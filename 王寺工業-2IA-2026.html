@@ -171,17 +171,16 @@
       <div class="card">
         <h2>📢 おしらせ！</h2>
         <ul>
-              <li>2025/11/15 学習アップデート！<a href="https://rerizu2.github.io/oji-2025-1AI/詳細アップデート情報3.html">詳細はこちら</a></li>
-              <li>2025/11/11 ポッキーの日アップデート！<a href="https://rerizu2.github.io/oji-2025-1AI/詳細アップデート情報2.html">詳細はこちら</a></li>
-              <li>2025/11/5 集合写真の画像をスライドボタンで切り替えるボタンを追加と写真の追加！</li>
-              <li>2025/9/1 新学期用アップデート！<a href="https://rerizu2.github.io/oji-2025-1AI/詳細アップデート情報.html">詳細はこちら</a></li>
-              <li>2025/5/24 プリントをGoogle Driveリンクに追加！</li>
-              <li>2025/5/20 時間割更新！</li>
+              <li>2026/3/19 2IAホームページを開放！</li>
             </ul>
       </div>
       <div class="card">
-        <h1>このページについて</h1>
-        <p style="text-align: center;">2IAのクラスメイト専用ページです✨<br>爽やかなブルーで楽しく情報をチェックしよう！</p>
+        <h1>2IA メンバーズページ<br>2IAのページについて</h1>
+            <p style="text-align:center;">このページは2IAの皆様・保護者専用です。Google Chatで配信された資料を一目で確認できます。ご意見は一政まで。</p>
+      </div>
+      <div class="card">
+        <h1>2IAホームページのQRコード</h1>
+        <img src="2IAホームページ-QRコード.png" alt="2IAページQRコード" width="300">
       </div>
     </section>
 
@@ -226,18 +225,17 @@
           <div class="card">
             <h2>📢 おしらせ！</h2>
             <ul>
-              <li>2025/11/15 学習アップデート！<a href="https://rerizu2.github.io/oji-2025-1AI/詳細アップデート情報3.html">詳細はこちら</a></li>
-              <li>2025/11/11 ポッキーの日アップデート！<a href="https://rerizu2.github.io/oji-2025-1AI/詳細アップデート情報2.html">詳細はこちら</a></li>
-              <li>2025/11/5 集合写真の画像をスライドボタンで切り替えるボタンを追加と写真の追加！</li>
-              <li>2025/9/1 新学期用アップデート！<a href="https://rerizu2.github.io/oji-2025-1AI/詳細アップデート情報.html">詳細はこちら</a></li>
-              <li>2025/5/24 プリントをGoogle Driveリンクに追加！</li>
-              <li>2025/5/20 時間割更新！</li>
+              <li>2026/3/19 2IAホームページを開放！</li>
             </ul>
           </div>
           <div class="card">
-            <h1>2IA メンバーズページ</h1>
-            <p style="text-align:center;">ブルーな気分を吹き飛ばす楽しい情報を発信中！</p>
-          </div>`;
+            <h1>2IA メンバーズページ<br>2IAのページについて</h1>
+            <p style="text-align:center;">このページは2IAの皆様・保護者専用です。Google Chatで配信された資料を一目で確認できます。ご意見は一政まで。</p>
+          </div>
+          <div class="card">
+        <h1>2IAホームページのQRコード</h1>
+        <img src="2IAホームページ-QRコード.png" alt="2IAページQRコード" width="300">
+      </div>`;
       } else if (page === 'schedule') {
         html = `<h1>📅 時間割</h1><div class="card"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0try5rh29bXvIfaEkguZxKXkh4qunWPHoAbNkZOreHdqWw_nLAQjdhCZ90JxvPlEfPdnSZ39hcfSy/pubhtml?widget=true&amp;headers=false" width="100%" height="400"></iframe></div>`;
       } else if (page === 'calendar') {
@@ -246,8 +244,13 @@
         html = `<h1>🎉 イベント</h1><div class="card"><p style="text-align:center;">今はイベント準備中かな？</p></div>`;
       } else if (page === 'gakusyuu') {
         html = `<h1>📖 学習/AI</h1>
-                <div class="card"><h2>🪑 席替えシステム</h2><a href="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" class="button button-blue" target="_blank">席替えをする！</a></div>
-                <div class="card"><h2>🤖 2IA専用AI</h2><iframe src="https://udify.app/chatbot/Fi5PD1a8XxhThlvE" style="width: 100%; height: 500px; border-radius:20px;" frameborder="0"></iframe></div>`;
+                <div class="card"><h2>🪑 席替えシステム</h2><iframe src="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" style="width: 100%; height: 100%; min-height: 700px" frameborder="0" allow="microphone"></iframe><a href="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" class="button button-blue" target="_blank">席替えをする！</a></div>
+                <div class="card"><h2>🤖 2IA専用AI</h2><iframe
+ src="https://udify.app/chatbot/92D920kUwjWcHbHb"
+ style="width: 100%; height: 100%; min-height: 700px"
+ frameborder="0"
+ allow="microphone">
+</iframe></div>`;
       } else if (page === 'test') {
         html = `<h1>📝 テストはんい</h1><div class="card"><p style="text-align:center;">テスト勉強、一緒に頑張ろう！</p></div>`;
       } else if (page === 'haihubutu') {
