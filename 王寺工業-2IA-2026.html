@@ -287,15 +287,10 @@
 
     /* --- Ctrl + D でソースコードを表示する機能 --- */
     window.addEventListener('keydown', function(e) {
-      // メイン画面が表示されている（ログイン後）かつ Ctrl + D が押された場合
       if (document.getElementById("main-content").style.display === "block") {
         if (e.ctrlKey && (e.key === 'd' || e.key === 'D')) {
-          e.preventDefault(); // ブラウザのブックマーク機能を防止
-          
-          // ソースコードを取得
+          e.preventDefault(); 
           const sourceCode = document.documentElement.outerHTML;
-          
-          // 新しいタブ（ウィンドウ）を開いて表示
           const newWindow = window.open();
           if (newWindow) {
             newWindow.document.write('<html><head><title>Source Code</title></head><body>');
