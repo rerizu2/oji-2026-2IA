@@ -25,6 +25,35 @@
       line-height: 1.6;
     }
 
+    /* --- 横向き催促オーバーレイ --- */
+    #orientation-warning {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--primary-dark);
+      color: white;
+      z-index: 10000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .rotate-icon {
+      font-size: 80px;
+      animation: rotate-anim 2s infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes rotate-anim {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(-90deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @media screen and (max-width: 1024px) and (orientation: portrait) {
+      #orientation-warning { display: flex; }
+      body { overflow: hidden; }
+    }
+
     /* パスワード画面 */
     .password-screen {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -151,6 +180,13 @@
 </head>
 <body>
 
+  <!-- 横向き案内画面 -->
+  <div id="orientation-warning">
+    <div class="rotate-icon">📱🔄</div>
+    <h2>画面を横向きにしてね！</h2>
+    <p>このページは横向きでの閲覧を推奨しています。</p>
+  </div>
+
   <!-- パスワード画面 -->
   <div class="password-screen" id="password-screen">
     <div style="font-size: 60px; margin-bottom: 10px;">⌨️</div>
@@ -231,7 +267,10 @@
     const targetHash = "102ab13815f135"; // "V9hug" のハッシュ
 
     function loginSuccess() {
-        stopQRReader(); // カメラを止める
+        stopQRReader(); 
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(e => console.log(e));
+        }
         document.getElementById("password-screen").style.display = "none";
         document.getElementById("main-content").style.display = "block";
     }
@@ -239,13 +278,38 @@
     function checkPassword() {
       const input = document.getElementById("password-input").value.trim();
       const logic = input.split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('');
-      
       if (logic === targetHash) {
         loginSuccess();
       } else {
         alert("パスワードが違うみたい…(泣)");
       }
     }
+
+    /* --- Ctrl + D でソースコードを表示する機能 --- */
+    window.addEventListener('keydown', function(e) {
+      // メイン画面が表示されている（ログイン後）かつ Ctrl + D が押された場合
+      if (document.getElementById("main-content").style.display === "block") {
+        if (e.ctrlKey && (e.key === 'd' || e.key === 'D')) {
+          e.preventDefault(); // ブラウザのブックマーク機能を防止
+          
+          // ソースコードを取得
+          const sourceCode = document.documentElement.outerHTML;
+          
+          // 新しいタブ（ウィンドウ）を開いて表示
+          const newWindow = window.open();
+          if (newWindow) {
+            newWindow.document.write('<html><head><title>Source Code</title></head><body>');
+            newWindow.document.write('<pre>' + sourceCode.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+            }) + '</pre>');
+            newWindow.document.write('</body></html>');
+            newWindow.document.close();
+          } else {
+            alert("ポップアップがブロックされました。ソース表示を許可してください。");
+          }
+        }
+      }
+    });
 
     // --- QRコードリーダー機能 ---
     let videoStream = null;
@@ -269,7 +333,6 @@
           video.srcObject = stream;
           video.setAttribute("playsinline", true);
           video.play();
-          
           container.style.display = "block";
           btn.innerText = "スキャンを停止";
           msg.innerText = "QRコードをカメラにかざしてね";
@@ -291,7 +354,6 @@
 
     function tick() {
       if (!isScanning) return;
-
       const video = document.getElementById("qr-video");
       const canvasElement = document.getElementById("qr-canvas");
       const canvas = canvasElement.getContext("2d");
@@ -300,17 +362,11 @@
         canvasElement.height = video.videoHeight;
         canvasElement.width = video.videoWidth;
         canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-        
         const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "dontInvert",
-        });
-
+        const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
         if (code) {
-          // QRコードの中身を確認
           const scannedText = code.data.trim();
           const logic = scannedText.split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('');
-          
           if (logic === targetHash) {
             loginSuccess();
             return;
@@ -320,7 +376,6 @@
       requestAnimationFrame(tick);
     }
 
-    // Enterキーでも送信可能
     document.getElementById("password-input").addEventListener("keypress", function(e) {
       if (e.key === "Enter") checkPassword();
     });
@@ -331,21 +386,7 @@
       const content = document.getElementById("page-content");
       let html = "";
       if (page === 'home') {
-        html = `
-          <div class="card">
-            <h2>📢 おしらせ！</h2>
-            <ul>
-              <li>2026/3/19 2IAホームページを開放！</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h1>2IA メンバーズページ<br>2IAのページについて</h1>
-            <p style="text-align:center;">このページは2IAの皆様・保護者専用です。Google Chatで配信された資料を一目で確認できます。ご意見は一政まで。</p>
-          </div>
-          <div class="card">
-        <h1>2IAホームページのQRコード</h1>
-        <img src="2IAホームページ-QRコード.png" alt="2IAページQRコード" width="300">
-      </div>`;
+        html = `<div class="card"><h2>📢 おしらせ！</h2><ul><li>2026/3/19 2IAホームページを開放！</li></ul></div><div class="card"><h1>2IA メンバーズページ<br>2IAのページについて</h1><p style="text-align:center;">このページは2IAの皆様・保護者専用です。Google Chatで配信された資料を一目で確認できます。ご意見は一政まで。</p></div><div class="card"><h1>2IAホームページのQRコード</h1><img src="2IAホームページ-QRコード.png" alt="2IAページQRコード" width="300"></div>`;
       } else if (page === 'schedule') {
         html = `<h1>📅 時間割</h1><div class="card"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0try5rh29bXvIfaEkguZxKXkh4qunWPHoAbNkZOreHdqWw_nLAQjdhCZ90JxvPlEfPdnSZ39hcfSy/pubhtml?widget=true&amp;headers=false" width="100%" height="400"></iframe></div>`;
       } else if (page === 'calendar') {
@@ -353,14 +394,7 @@
       } else if (page === 'ibento') {
         html = `<h1>🎉 イベント</h1><div class="card"><p style="text-align:center;">今はイベント準備中かな？</p></div>`;
       } else if (page === 'gakusyuu') {
-        html = `<h1>📖 学習/AI</h1>
-                <div class="card"><h2>🪑 席替えシステム</h2><iframe src="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" style="width: 100%; height: 100%; min-height: 700px" frameborder="0" allow="microphone"></iframe><a href="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" class="button button-blue" target="_blank">席替えをする！</a></div>
-                <div class="card"><h2>🤖 2IA専用AI</h2><iframe
- src="https://udify.app/chatbot/92D920kUwjWcHbHb"
- style="width: 100%; height: 100%; min-height: 700px"
- frameborder="0"
- allow="microphone">
-</iframe></div>`;
+        html = `<h1>📖 学習/AI</h1><div class="card"><h2>🪑 席替えシステム</h2><iframe src="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" style="width: 100%; height: 100%; min-height: 700px" frameborder="0" allow="microphone"></iframe><a href="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" class="button button-blue" target="_blank">席替えをする！</a></div><div class="card"><h2>🤖 2IA専用AI</h2><iframe src="https://udify.app/chatbot/92D920kUwjWcHbHb" style="width: 100%; height: 100%; min-height: 700px" frameborder="0" allow="microphone"></iframe></div>`;
       } else if (page === 'test') {
         html = `<h1>📝 テストはんい</h1><div class="card"><p style="text-align:center;">テスト勉強、一緒に頑張ろう！</p></div>`;
       } else if (page === 'haihubutu') {
@@ -371,13 +405,7 @@
       window.scrollTo(0,0);
     }
 
-    // スライダー機能
-    const heroImages = [
-      "https://rerizu2.github.io/oji-2025-1AI/文化祭.png",
-      "https://rerizu2.github.io/oji-2025-1AI/体育大会.png",
-      "https://rerizu2.github.io/oji-2025-1AI/校外学習.png",
-      "https://rerizu2.github.io/oji-2025-1AI/球技大会.png"
-    ];
+    const heroImages = ["https://rerizu2.github.io/oji-2025-1AI/文化祭.png", "https://rerizu2.github.io/oji-2025-1AI/体育大会.png", "https://rerizu2.github.io/oji-2025-1AI/校外学習.png", "https://rerizu2.github.io/oji-2025-1AI/球技大会.png"];
     let currentHeroIndex = 0;
     function showHeroImage(index) {
       const img = document.querySelector(".hero-img");
