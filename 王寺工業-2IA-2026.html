@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>王寺工業 2IA | Blue Sky School Life</title>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+  <!-- QRコード解析ライブラリ jsQR を読み込み -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
     :root {
       --primary: #4cc9f0; 
@@ -26,7 +28,7 @@
     /* パスワード画面 */
     .password-screen {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      height: 100vh; background: var(--header-grad); color: white;
+      min-height: 100vh; background: var(--header-grad); color: white;
       text-align: center; padding: 20px;
     }
     .password-screen h1 { margin-bottom: 20px; font-size: 28px; text-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
@@ -36,9 +38,30 @@
     }
     .password-screen button {
       padding: 12px 40px; font-size: 18px; border-radius: 30px; border: none; background: #fff; color: var(--primary-dark);
-      font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 5px;
     }
     .password-screen button:hover { transform: scale(1.1); }
+
+    /* QRリーダー用のスタイル */
+    #qr-reader-container {
+      display: none;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 300px;
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 4px solid white;
+      background: #000;
+    }
+    #qr-video { width: 100%; height: auto; display: block; }
+    #qr-canvas { display: none; }
+    .scan-line {
+      position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+      background: rgba(255,255,255,0.7); box-shadow: 0 0 10px #fff;
+      animation: scan 2s linear infinite;
+    }
+    @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
 
     /* ヘッダー */
     header {
@@ -133,8 +156,21 @@
     <div style="font-size: 60px; margin-bottom: 10px;">⌨️</div>
     <h1>2IA Blue Members</h1>
     <p style="margin-bottom: 20px; font-weight: bold;">パスワードを入れてね！</p>
+    
     <input type="password" id="password-input" placeholder="Password...">
-    <button onclick="checkPassword()">ログイン！</button>
+    
+    <div style="display: flex; gap: 10px;">
+      <button onclick="checkPassword()">ログイン！</button>
+      <button onclick="toggleQRReader()" id="qr-toggle-btn">QRでスキャン</button>
+    </div>
+
+    <!-- QRリーダー表示エリア -->
+    <div id="qr-reader-container">
+      <video id="qr-video" playsinline></video>
+      <canvas id="qr-canvas"></canvas>
+      <div class="scan-line"></div>
+    </div>
+    <p id="qr-msg" style="margin-top: 10px; font-size: 12px; opacity: 0.8;"></p>
   </div>
 
   <!-- 本編画面 -->
@@ -159,7 +195,7 @@
       <img src="https://rerizu2.github.io/oji-2025-1AI/文化祭.png" alt="スライド写真" class="hero-img">
       <div class="hero-text">
         <h1>✨ 2IA's Blue World ✨</h1>
-        <p>王寺工業高校 情報電子工学科 1年A組</p>
+        <p>王寺工業高校 情報電子工学科 2年A組</p>
       </div>
       <div class="hero-buttons">
         <button class="hero-btn" onclick="prevHero()">◀</button>
@@ -191,23 +227,97 @@
   </div>
 
   <script>
-    /*
-      どんな環境でも動くように、特殊な計算式でパスワードを隠しました。
-      正解は「V9hug」です。
-    */
-    function checkPassword() {
-      const input = document.getElementById("password-input").value.trim();
-      
-      // 文字コードを使った簡易ハッシュ計算（ローカルでも動作します）
-      const logic = input.split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('');
-      const target = "102ab13815f135"; 
+    // パスワード正解の判定用ロジック
+    const targetHash = "102ab13815f135"; // "V9hug" のハッシュ
 
-      if (logic === target) {
+    function loginSuccess() {
+        stopQRReader(); // カメラを止める
         document.getElementById("password-screen").style.display = "none";
         document.getElementById("main-content").style.display = "block";
+    }
+
+    function checkPassword() {
+      const input = document.getElementById("password-input").value.trim();
+      const logic = input.split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('');
+      
+      if (logic === targetHash) {
+        loginSuccess();
       } else {
         alert("パスワードが違うみたい…(泣)");
       }
+    }
+
+    // --- QRコードリーダー機能 ---
+    let videoStream = null;
+    let isScanning = false;
+
+    async function toggleQRReader() {
+      const container = document.getElementById("qr-reader-container");
+      const btn = document.getElementById("qr-toggle-btn");
+      const msg = document.getElementById("qr-msg");
+
+      if (isScanning) {
+        stopQRReader();
+        container.style.display = "none";
+        btn.innerText = "QRでスキャン";
+        msg.innerText = "";
+      } else {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+          videoStream = stream;
+          const video = document.getElementById("qr-video");
+          video.srcObject = stream;
+          video.setAttribute("playsinline", true);
+          video.play();
+          
+          container.style.display = "block";
+          btn.innerText = "スキャンを停止";
+          msg.innerText = "QRコードをカメラにかざしてね";
+          isScanning = true;
+          requestAnimationFrame(tick);
+        } catch (err) {
+          alert("カメラが使えないようです。設定を確認してください。");
+        }
+      }
+    }
+
+    function stopQRReader() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+      }
+      isScanning = false;
+    }
+
+    function tick() {
+      if (!isScanning) return;
+
+      const video = document.getElementById("qr-video");
+      const canvasElement = document.getElementById("qr-canvas");
+      const canvas = canvasElement.getContext("2d");
+
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+        
+        const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+
+        if (code) {
+          // QRコードの中身を確認
+          const scannedText = code.data.trim();
+          const logic = scannedText.split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('');
+          
+          if (logic === targetHash) {
+            loginSuccess();
+            return;
+          }
+        }
+      }
+      requestAnimationFrame(tick);
     }
 
     // Enterキーでも送信可能
