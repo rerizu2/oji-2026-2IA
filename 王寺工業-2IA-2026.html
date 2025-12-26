@@ -89,12 +89,13 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       min-height: 100vh; background: var(--header-grad); color: white; text-align: center; padding: 20px;
     }
+    .password-screen h1 { margin-bottom: 20px; font-size: 28px; text-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
     .password-screen input {
       padding: 15px; font-size: 18px; border-radius: 30px; border: none; outline: none; width: 80%; max-width: 300px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center;
     }
     .password-screen button {
-      padding: 12px 40px; font-size: 18px; border-radius: 30px; border: none; background: #fff; color: var(--primary-dark);
+      padding: 12px 40px; font-size: 18px; border-radius: var(--card-radius); border: none; background: #fff; color: var(--primary-dark);
       font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 5px;
     }
 
@@ -174,8 +175,9 @@
 
   <div class="password-screen" id="password-screen">
     <div style="font-size: 60px; margin-bottom: 10px;">⌨️</div>
-    <h1>2IA Blue Members</h1>
-    <p style="margin-bottom: 20px; font-weight: bold;">パスワードを入れてね！</p>
+    <!-- IDを付与してテキストを動的に変えられるように -->
+    <h1 id="login-title">2IA Blue Members</h1>
+    <p id="login-msg" style="margin-bottom: 20px; font-weight: bold;">パスワードを入れてね！</p>
     <input type="password" id="password-input" placeholder="Password...">
     <div style="display: flex; gap: 10px;">
       <button onclick="checkPassword()">ログイン！</button>
@@ -190,7 +192,7 @@
 
   <div class="main-content" id="main-content" style="display:none;">
     <header>
-      <div class="logo">✨ 2IA OJI-TECH</div>
+      <div id="header-logo" class="logo">✨ 2IA OJI-TECH</div>
       
       <div style="display: flex; align-items: center;">
         <!-- デザイン切り替えスイッチ -->
@@ -247,19 +249,54 @@
     // --- デザイン切り替えのロジック ---
     function toggleDesign() {
       const isChecked = document.getElementById('design-toggle').checked;
-      if (isChecked) {
-        document.body.classList.add('theme-1ia');
+      applyTheme(isChecked);
+      // ローカルストレージに設定を保存
+      localStorage.setItem('theme-preference', isChecked ? '1ia' : '2ia');
+    }
+
+    // テーマを適用する関数
+    function applyTheme(is1IA) {
+      const body = document.body;
+      const loginTitle = document.getElementById('login-title');
+      const loginMsg = document.getElementById('login-msg');
+      const headerLogo = document.getElementById('header-logo');
+      const heroTitle = document.getElementById('hero-title');
+      const heroSub = document.getElementById('hero-sub');
+      const footerText = document.getElementById('footer-text');
+
+      if (is1IA) {
+        body.classList.add('theme-1ia');
+        loginTitle.innerText = "王寺工業高校 1年A組";
+        loginMsg.innerText = "パスワードを入力してください";
+        headerLogo.innerText = "1年 I科 A組";
+        heroTitle.innerText = "ようこそ 1IA ページへ";
+        heroSub.innerText = "情報電子工学科";
+        footerText.innerText = "1IA クラシックスタイル";
       } else {
-        document.body.classList.remove('theme-1ia');
+        body.classList.remove('theme-1ia');
+        loginTitle.innerText = "2IA Blue Members";
+        loginMsg.innerText = "パスワードを入れてね！";
+        headerLogo.innerText = "✨ 2IA OJI-TECH";
+        heroTitle.innerText = "✨ 2IA's Blue World ✨";
+        heroSub.innerText = "王寺工業高校 情報電子工学科 2年A組";
+        footerText.innerText = "Enjoy 2IA Blue Life! 💻️";
       }
     }
+
+    // 読み込み時に保存されたテーマを確認
+    window.onload = function() {
+      const savedTheme = localStorage.getItem('theme-preference');
+      const is1IA = (savedTheme === '1ia');
+      document.getElementById('design-toggle').checked = is1IA;
+      applyTheme(is1IA);
+    };
 
     // --- 既存の機能ロジック (変更なし) ---
     function loginSuccess() {
       stopQRReader(); 
       document.getElementById("password-screen").style.display = "none";
       document.getElementById("main-content").style.display = "block";
-      showPage('home'); // ログイン時に初期ページ表示
+      showPage('home'); 
     }
 
     function checkPassword() {
@@ -331,13 +368,17 @@
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
         if (code) {
-          const logic = code.data.trim().split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('');
+          const scannedText = code.data.trim();
+          const logic = scannedText.split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('');
           if (logic === targetHash) { loginSuccess(); return; }
         }
       }
       requestAnimationFrame(tick);
     }
     function toggleMenu() { document.getElementById("nav-list").classList.toggle("show"); }
+    document.getElementById("password-input").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") checkPassword();
+    });
   </script>
 </body>
 </html>
