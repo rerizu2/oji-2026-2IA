@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>王寺工業 2IA | Blue Sky School Life</title>
+  <!-- フォント読み込み -->
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <!-- QRコード解析ライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <style>
+    /* --- デザイン変数 (2IAデフォルト) --- */
+    :root {
+      --primary: #4cc9f0; 
+      --primary-dark: #4361ee; 
+      --secondary: #ffd166; 
+      --bg-color: #f0f7ff; 
+      --text-color: #2b2d42; 
+      --header-grad: linear-gradient(90deg, #4361ee, #4cc9f0, #72efdd);
+      --font-main: 'M PLUS Rounded 1c', sans-serif;
+      --card-radius: 25px;
+      --header-radius: 0 0 20px 20px;
+      --hero-width: 95%;
+      --hero-margin: 20px auto;
+    }
+
+    /* --- 1IAデザイン (スイッチON時に適用) --- */
+    body.theme-1ia {
+      --primary: #005bac; 
+      --primary-dark: #004080; 
+      --bg-color: #f8f9fa; 
+      --text-color: #333; 
+      --header-grad: #005bac;
+      --font-main: 'Noto Sans JP', sans-serif;
+      --card-radius: 8px;
+      --header-radius: 0;
+      /* 1IA時は画像を端から端まで表示 */
+      --hero-width: 100%;
+      --hero-margin: 0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.3s, border-radius 0.3s; }
+    body { font-family: var(--font-main); background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; }
+
+    /* --- パスワード画面（1IAデザイン切り替え対応） --- */
+    .password-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; background: var(--header-grad); color: white; text-align: center; padding: 20px;
+    }
+    /* 1IAテーマ時のログイン背景を#333に固定 */
+    body.theme-1ia .password-screen { background: #333 !important; }
+
+    .password-screen h1 { margin-bottom: 20px; font-size: 24px; font-weight: bold; }
+    .password-screen input {
+      padding: 12px; font-size: 16px; border-radius: var(--card-radius); border: none; outline: none; width: 80%; max-width: 300px; margin-bottom: 15px; text-align: center;
+    }
+    .password-screen button {
+      padding: 10px 25px; font-size: 16px; border-radius: var(--card-radius); border: none; background: #fff; color: #333; font-weight: bold; cursor: pointer; margin: 5px;
+    }
+    /* 1IAテーマ時のボタンを少しグレーに */
+    body.theme-1ia .password-screen button { background: #f0f0f0; border-radius: 4px; }
+
+    /* --- ヘッダー --- */
+    header {
+      background: var(--header-grad); padding: 15px 20px; position: sticky; top: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between; border-radius: var(--header-radius);
+    }
+    header .logo { font-size: 18px; font-weight: 800; color: white; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; }
+    
+    /* --- スイッチ --- */
+    .switch-area { display: flex; align-items: center; gap: 8px; margin-right: 10px; }
+    .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.3); transition: .4s; border-radius: 22px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #ffd166; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* --- ヒーローエリア (動く画像) --- */
+    .hero { 
+      position: relative; width: var(--hero-width); max-width: 1200px; margin: var(--hero-margin);
+      border-radius: var(--card-radius); overflow: hidden; border: 6px solid white; transition: all 0.3s;
+    }
+    body.theme-1ia .hero { border: none; max-width: 100%; border-radius: 0; }
+    .hero-img { display: block; width: 100%; height: auto; transition: opacity 0.8s; }
+    .hero-text { position: absolute; bottom: 20px; left: 20px; right: 20px; background: rgba(255,255,255,0.85); padding: 15px; border-radius: 20px; text-align: center; color: #2b2d42; }
+    body.theme-1ia .hero-text { background: rgba(0,0,0,0.5); color: white; bottom: 0; left: 0; right: 0; border-radius: 0; padding: 20px; }
+
+    /* コンテンツ */
+    .page-content { max-width: 1000px; margin: 20px auto; padding: 20px; }
+    .card { background: white; border-radius: var(--card-radius); padding: 25px; margin-bottom: 25px; border-bottom: 6px solid var(--primary); }
+
+    @media (max-width: 768px) { nav ul { display: none; } .menu-toggle { display: block; color: white; font-size: 24px; cursor: pointer; } }
+  </style>
+</head>
+<body>
+
+  <!-- パスワード画面 -->
+  <div class="password-screen" id="password-screen">
+    <div id="login-emoji" style="font-size: 60px; margin-bottom: 10px;">⌨️</div>
+    <h1 id="login-title">2IA Blue Members</h1>
+    <p id="login-msg" style="margin-bottom: 20px; font-weight: bold;">パスワードを入れてね！</p>
+    
+    <input type="password" id="password-input" placeholder="Password...">
+    
+    <div>
+      <button onclick="checkPassword()">ログイン！</button>
+      <button id="qr-btn" onclick="toggleQRReader()">QRでスキャン</button>
+    </div>
+    
+    <div id="qr-reader-container" style="display:none; margin-top:20px; width:300px; border:4px solid white; border-radius:20px; overflow:hidden;">
+      <video id="qr-video" playsinline style="width:100%;"></video>
+      <canvas id="qr-canvas" style="display:none;"></canvas>
+    </div>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <div class="main-content" id="main-content" style="display:none;">
+    <header>
+      <div id="header-logo" class="logo">✨ 2IA OJI-TECH</div>
+      <div style="display: flex; align-items: center;">
+        <div class="switch-area">
+          <span style="color:white; font-size:10px; font-weight:bold;">1IA風</span>
+          <label class="switch">
+            <input type="checkbox" id="theme-toggle" onchange="switchTheme()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+      </div>
+      <nav><ul id="nav-list"><li><a onclick="showPage('home')">🏠ホーム</a></li><li><a onclick="showPage('schedule')">📅時間割</a></li></ul></nav>
+    </header>
+
+    <section class="hero">
+      <img src="https://rerizu2.github.io/oji-2025-1AI/文化祭.png" alt="スライド" class="hero-img">
+      <div class="hero-text">
+        <h1 id="hero-title">✨ 2IA's Blue World ✨</h1>
+        <p id="hero-sub">王寺工業高校 情報電子工学科 2年A組</p>
+      </div>
+    </section>
+
+    <section class="page-content" id="page-content"></section>
+
+    <footer style="text-align:center; padding:30px; background:var(--primary); color:white;">
+      <p id="footer-text">&copy; 2026 王寺工業高等学校 2年A組</p>
+    </footer>
+  </div>
+
+  <script>
+    const targetHash = "102ab13815f135"; // V9hug
+
+    // --- デザイン切り替え ---
+    function switchTheme() {
+      const is1IA = document.getElementById('theme-toggle').checked;
+      applyTheme(is1IA);
+      localStorage.setItem('oji-theme', is1IA ? '1ia' : '2ia');
+    }
+
+    function applyTheme(is1IA) {
+      const body = document.body;
+      if (is1IA) {
+        body.classList.add('theme-1ia');
+        document.getElementById('login-title').innerText = "パスワードを入力してください";
+        document.getElementById('login-msg').innerText = "";
+        document.getElementById('login-emoji').style.display = "none";
+        document.getElementById('header-logo').innerText = "1年 I科 A組";
+        document.getElementById('hero-title').innerText = "ようこそ 1IA ページへ";
+        document.getElementById('hero-sub').innerText = "情報電子工学科";
+      } else {
+        body.classList.remove('theme-1ia');
+        document.getElementById('login-title').innerText = "2IA Blue Members";
+        document.getElementById('login-msg').innerText = "パスワードを入れてね！";
+        document.getElementById('login-emoji').style.display = "block";
+        document.getElementById('header-logo').innerText = "✨ 2IA OJI-TECH";
+        document.getElementById('hero-title').innerText = "✨ 2IA's Blue World ✨";
+        document.getElementById('hero-sub').innerText = "王寺工業高校 情報電子工学科 2年A組";
+      }
+      if (document.getElementById('main-content').style.display === 'block') showPage('home');
+    }
+
+    // 読み込み時に保存されたテーマを適用
+    window.onload = function() {
+      const saved = localStorage.getItem('oji-theme');
+      const is1IA = (saved === '1ia');
+      document.getElementById('theme-toggle').checked = is1IA;
+      applyTheme(is1IA);
+    };
+
+    // --- ログイン ---
+    function checkPassword() {
+      const input = document.getElementById("password-input").value.trim();
+      const logic = input.split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('');
+      if (logic === targetHash) {
+        document.getElementById("password-screen").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+        showPage('home');
+      } else { alert("パスワードが違います"); }
+    }
+
+    function showPage(page) {
+      const content = document.getElementById("page-content");
+      if (document.body.classList.contains('theme-1ia')) {
+        content.innerHTML = `<div class="card"><h1>1IAデザイン</h1><p>当時のシンプルなデザインを再現中。</p></div>`;
+      } else {
+        content.innerHTML = `<div class="card"><h2>📢 お知らせ</h2><p>2IAの最新情報はこちら。</p></div>`;
+      }
+    }
+
+    // スライドショー
+    const heroImages = ["https://rerizu2.github.io/oji-2025-1AI/文化祭.png", "https://rerizu2.github.io/oji-2025-1AI/体育大会.png", "https://rerizu2.github.io/oji-2025-1AI/校外学習.png", "https://rerizu2.github.io/oji-2025-1AI/球技大会.png"];
+    let idx = 0;
+    setInterval(() => { idx = (idx + 1) % heroImages.length; document.querySelector(".hero-img").src = heroImages[idx]; }, 5000);
+    function toggleMenu() { document.getElementById("nav-list").classList.toggle("show"); }
+
+    // --- QR (簡易) ---
+    let stream = null;
+    async function toggleQRReader() {
+      const container = document.getElementById("qr-reader-container");
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; container.style.display = "none"; }
+      else {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        document.getElementById("qr-video").srcObject = stream;
+        document.getElementById("qr-video").play();
+        container.style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
