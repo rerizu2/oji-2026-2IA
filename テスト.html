@@ -43,49 +43,26 @@
       --card-border: 1px solid #ddd; 
     }
 
-    /* --- 縦画面ブロック用の設定 --- */
+    /* --- 縦画面ブロック設定 --- */
     #orientation-warning {
-      display: none; /* 通常は非表示 */
+      display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #333;
-      color: white;
-      z-index: 10000;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 20px;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #333; color: white; z-index: 10000;
+      flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;
     }
-    .rotate-icon {
-      font-size: 80px;
-      margin-bottom: 20px;
-      animation: rotate-anim 2s infinite;
-    }
-    @keyframes rotate-anim {
-      0% { transform: rotate(0deg); }
-      50% { transform: rotate(-90deg); }
-      100% { transform: rotate(0deg); }
-    }
+    .rotate-icon { font-size: 80px; margin-bottom: 20px; animation: rotate-anim 2s infinite; }
+    @keyframes rotate-anim { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
 
-    /* 縦向き(Portrait)の時だけ警告を表示するメディアクエリ */
     @media screen and (orientation: portrait) {
       #orientation-warning { display: flex; }
-      body { overflow: hidden; } /* 背景スクロール禁止 */
+      body { overflow: hidden; }
     }
 
     /* 全体調整 */
     html, body { overflow-x: hidden; width: 100%; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body { 
-      font-family: var(--font-main); 
-      background-color: var(--bg-color); 
-      color: var(--text-color);
-      line-height: 1.6;
-      transition: background 0.3s ease;
-    }
+    body { font-family: var(--font-main); background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; transition: background 0.3s ease; }
 
     /* パスワード画面 */
     .password-screen {
@@ -94,14 +71,8 @@
     }
     body.theme-1ia .password-screen { background: #333 !important; }
     .password-screen h1 { margin-bottom: 20px; font-size: 28px; }
-    .password-screen input {
-      padding: 15px; font-size: 18px; border-radius: var(--card-radius); border: none; outline: none; width: 80%; max-width: 300px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; color: #333;
-    }
-    .password-screen button {
-      padding: 12px 30px; font-size: 16px; border-radius: var(--card-radius); border: none; background: #fff; color: var(--primary-dark);
-      font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 5px;
-    }
+    .password-screen input { padding: 15px; font-size: 18px; border-radius: var(--card-radius); border: none; outline: none; width: 80%; max-width: 300px; margin-bottom: 15px; text-align: center; color: #333; }
+    .password-screen button { padding: 12px 30px; font-size: 16px; border-radius: var(--card-radius); border: none; background: #fff; color: var(--primary-dark); font-weight: bold; cursor: pointer; margin: 5px; }
 
     /* ヘッダー */
     header {
@@ -111,9 +82,7 @@
     }
     header .logo { font-size: 18px; font-weight: 800; color: white; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; }
     
-    /* デザインスイッチ */
     .switch-area { display: flex; align-items: center; gap: 8px; margin-right: 10px; }
-    .switch-label { color: white; font-size: 10px; font-weight: bold; }
     .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.3); transition: .4s; border-radius: 20px; }
@@ -123,37 +92,34 @@
 
     nav ul { display: flex; list-style: none; gap: 5px; }
     nav ul li a { color: white; text-decoration: none; font-weight: 700; cursor: pointer; padding: 8px 12px; border-radius: 12px; font-size: 13px; }
+    nav ul li a:hover { background: rgba(255,255,255,0.3); }
 
-    /* ヒーローエリア (動く画像) */
+    /* ヒーローエリア */
     .hero { 
-      position: relative; 
-      width: var(--hero-width); 
-      max-width: var(--hero-max-width); 
-      margin: var(--hero-margin);
-      border-radius: var(--card-radius); 
-      overflow: hidden; 
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-      border: var(--hero-border);
+      position: relative; width: var(--hero-width); max-width: var(--hero-max-width); margin: var(--hero-margin);
+      border-radius: var(--card-radius); overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: var(--hero-border);
       transition: width 0.4s ease, max-width 0.4s ease, margin 0.4s ease, border-radius 0.4s ease;
+      background-color: #fff; /* フェード中の背景色 */
     }
-    body.theme-1ia .hero { border: none !important; box-shadow: none !important; }
-
-    .hero-img { display: block; width: 100%; height: auto; object-fit: cover; transition: opacity 0.8s ease; }
+    body.theme-1ia .hero { border: none !important; box-shadow: none !important; background-color: #000; }
     
-    .hero-text { 
-      position: absolute; bottom: 20px; left: 20px; right: 20px;
-      background: rgba(255,255,255,0.9); padding: 15px; border-radius: 15px;
-      text-align: center; backdrop-filter: blur(5px); transition: all 0.4s ease;
+    /* フェードアニメーション用の設定 */
+    .hero-img { 
+      display: block; 
+      width: 100%; 
+      height: auto; 
+      object-fit: cover; 
+      opacity: 1;
+      transition: opacity 0.8s ease-in-out; /* ふわっと切り替わる時間 */
     }
-    body.theme-1ia .hero-text {
-      background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: white; 
-      border-radius: 0; bottom: 0; left: 0; right: 0; padding: 40px 20px 20px;
-    }
-    .hero-text h1 { font-size: 24px; color: var(--primary-dark); margin-bottom: 5px; }
-    body.theme-1ia .hero-text h1 { color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-size: 28px; }
+    
+    .hero-text { position: absolute; bottom: 20px; left: 20px; right: 20px; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 15px; text-align: center; backdrop-filter: blur(5px); transition: all 0.4s ease; z-index: 5; }
+    body.theme-1ia .hero-text { background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: white; border-radius: 0; bottom: 0; left: 0; right: 0; padding: 40px 20px 20px; }
+    .hero-text h1 { font-size: 24px; color: var(--primary-dark); }
+    body.theme-1ia .hero-text h1 { color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
 
-    .hero-buttons { position: absolute; top: 50%; width: 100%; display: flex; justify-content: space-between; transform: translateY(-50%); padding: 0 10px; pointer-events: none; }
-    .hero-btn { background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 18px; cursor: pointer; pointer-events: auto; color: var(--primary-dark); }
+    .hero-buttons { position: absolute; top: 50%; width: 100%; display: flex; justify-content: space-between; transform: translateY(-50%); padding: 0 10px; pointer-events: none; z-index: 10; }
+    .hero-btn { background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 18px; cursor: pointer; pointer-events: auto; color: var(--primary-dark); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
     /* コンテンツエリア */
     .page-content { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
@@ -163,12 +129,13 @@
       transition: border-radius 0.3s ease, border-bottom 0.3s ease;
     }
     .card h2 { color: var(--primary-dark); font-size: 20px; border-left: 5px solid var(--primary); padding-left: 10px; margin-bottom: 15px; }
+    .card h1 { color: var(--primary-dark); font-size: 22px; margin-bottom: 15px; text-align: center; }
+    .card ul { list-style: none; }
+    .card li { background: #eef8ff; margin-bottom: 10px; padding: 12px; border-radius: 15px; border-left: 4px solid var(--primary); font-size: 14px; }
+    iframe { border: none; width: 100%; border-radius: 15px; }
 
-    /* カウントダウンスタイル */
-    .countdown-card {
-      background: #0b0f1a; color: #e6ffff; border: 1px solid #00ffff; border-radius: 12px;
-      padding: 20px; margin-bottom: 25px; text-align: center; font-family: "Roboto Mono", monospace;
-    }
+    /* カウントダウンスタイル (1IA用) */
+    .countdown-card { background: #0b0f1a; color: #e6ffff; border: 1px solid #00ffff; border-radius: 12px; padding: 20px; margin-bottom: 25px; text-align: center; font-family: "Roboto Mono", monospace; }
     .time-glow { color: #00ff9c; font-weight: bold; animation: glow 1.8s infinite alternate; font-size: 1.4em; }
     @keyframes glow { from { text-shadow: 0 0 4px rgba(0,255,156,0.5); } to { text-shadow: 0 0 12px rgba(0,255,156,1); } }
 
@@ -179,20 +146,17 @@
       nav ul { display: none; flex-direction: column; background: var(--primary-dark); position: absolute; top: 60px; right: 10px; width: 180px; padding: 10px; border-radius: 10px; }
       nav ul.show { display: flex; }
       .menu-toggle { display: block; color: white; font-size: 24px; cursor: pointer; }
-      .hero-text h1 { font-size: 20px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 縦画面ブロック案内画面 -->
   <div id="orientation-warning">
     <div class="rotate-icon">📱🔄</div>
     <h2>画面を横向きにしてね！</h2>
     <p>このページは横向きでの閲覧を推奨しています。</p>
   </div>
 
-  <!-- パスワード画面 -->
   <div class="password-screen" id="password-screen">
     <div id="login-emoji" style="font-size: 50px; margin-bottom: 10px;">⌨️</div>
     <h1 id="login-title">2IA Blue Members</h1>
@@ -202,14 +166,12 @@
       <button onclick="checkPassword()">ログイン</button>
       <button onclick="toggleQRReader()" id="qr-toggle-btn">QRスキャン</button>
     </div>
-    <div id="qr-reader-container">
-      <video id="qr-video" playsinline></video>
+    <div id="qr-reader-container" style="display:none; margin-top:20px; width:300px; border:4px solid white; border-radius:20px; overflow:hidden;">
+      <video id="qr-video" playsinline style="width:100%;"></video>
       <canvas id="qr-canvas" style="display:none;"></canvas>
-      <div class="scan-line"></div>
     </div>
   </div>
 
-  <!-- 本編画面 -->
   <div class="main-content" id="main-content" style="display:none;">
     <header>
       <div id="header-logo" class="logo">✨ 2IA OJI-TECH</div>
@@ -228,7 +190,9 @@
           <li><a onclick="showPage('home')">🏠ホーム</a></li>
           <li><a onclick="showPage('schedule')">📅時間割</a></li>
           <li><a onclick="showPage('calendar')">🗓️カレンダー</a></li>
+          <li><a onclick="showPage('ibento')">🎉イベント</a></li>
           <li><a onclick="showPage('gakusyuu')">📖学習/AI</a></li>
+          <li><a onclick="showPage('test')">📝テスト</a></li>
           <li><a onclick="showPage('haihubutu')">📁プリント</a></li>
         </ul>
       </nav>
@@ -278,8 +242,8 @@
         body.classList.add('theme-1ia');
         loginTitle.innerText = "パスワードを入力してください";
         emoji.style.display = "none";
-        headerLogo.innerText = "1年 I科 A組";
-        heroTitle.innerText = "ようこそ 1IA ページへ";
+        headerLogo.innerText = "2年 I科 A組";
+        heroTitle.innerText = "ようこそ 2IA ページへ";
         heroSub.innerText = "情報電子工学科 クラシックモード";
         footerText.innerText = "Classic 1IA Spirit!";
       } else {
@@ -318,23 +282,31 @@
       let html = "";
       if (page === 'home') {
         if (is1IA) {
-          html = `<div class="card"><h1>1IAデザイン復刻</h1><p>全幅画像と当時の雰囲気を再現しています。</p></div>
-                  <div class="countdown-card">
-                    <p>2025年終了まで</p><div id="countdown-year" class="time-glow">Loading...</div>
-                    <p style="margin-top:10px;">3学期終了まで</p><div id="countdown-school" class="time-glow">Loading...</div>
-                  </div>`;
+          html = `<div class="card"><h2>📢 おしらせ！</h2><ul><li>2026/3/19 2IAホームページを開放！</li></ul></div>
+                  <div class="card"><h1>2IA メンバーズページ<br>2IAのページについて</h1><p style="text-align:center;">このページは2IAの皆様・保護者専用です。Google Chatで配信された資料を一目で確認できます。ご意見は一政まで。</p></div>
+                  <div class="card"><h1>2IAホームページのQRコード</h1><img src="2IAホームページ-QRコード.png" alt="2IAページQRコード" style="width:300px; display:block; margin:0 auto; border-radius:15px;"></div>`;
         } else {
-          html = `<div class="card"><h2>📢 お知らせ</h2><ul><li>2026/3/19 2IAサイト開放</li></ul></div><div class="card"><h1>2IA メンバーズページ</h1><p style="text-align:center;">このページは2IAの皆様・保護者専用です。</p></div>`;
+          html = `<div class="card"><h2>📢 おしらせ！</h2><ul><li>2026/3/19 2IAホームページを開放！</li></ul></div>
+                  <div class="card"><h1>2IA メンバーズページ<br>2IAのページについて</h1><p style="text-align:center;">このページは2IAの皆様・保護者専用です。Google Chatで配信された資料を一目で確認できます。ご意見は一政まで。</p></div>
+                  <div class="card"><h1>2IAホームページのQRコード</h1><img src="2IAホームページ-QRコード.png" alt="2IAページQRコード" style="width:300px; display:block; margin:0 auto; border-radius:15px;"></div>`;
         }
       } else if (page === 'schedule') {
-        html = `<div class="card"><h2>📅 時間割</h2><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0try5rh29bXvIfaEkguZxKXkh4qunWPHoAbNkZOreHdqWw_nLAQjdhCZ90JxvPlEfPdnSZ39hcfSy/pubhtml?widget=true&amp;headers=false" width="100%" height="400" frameborder="0"></iframe></div>`;
+        html = `<h1>📅 時間割</h1><div class="card"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0try5rh29bXvIfaEkguZxKXkh4qunWPHoAbNkZOreHdqWw_nLAQjdhCZ90JxvPlEfPdnSZ39hcfSy/pubhtml?widget=true&amp;headers=false" height="400"></iframe></div>`;
+      } else if (page === 'calendar') {
+        html = `<h1>🗓️ カレンダー</h1><div class="card"><iframe src="https://calendar.google.com/calendar/embed?src=youmuyizheng%40gmail.com&ctz=Asia%2FTokyo" height="500"></iframe></div>`;
+      } else if (page === 'ibento') {
+        html = `<h1>🎉 イベント</h1><div class="card"><p style="text-align:center;">今はイベント準備中かな？</p></div>`;
       } else if (page === 'gakusyuu') {
-        html = `<div class="card"><h2>🤖 AIチャット</h2><iframe src="https://udify.app/chatbot/92D920kUwjWcHbHb" style="width: 100%; height: 600px" frameborder="0"></iframe></div>`;
+        html = `<h1>📖 学習/AI</h1><div class="card"><h2>🪑 席替えシステム</h2><iframe src="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" style="height: 700px" frameborder="0"></iframe><a href="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" target="_blank" style="display:block; text-align:center; margin-top:10px; color:var(--primary-dark); font-weight:bold;">別タブで開く</a></div>
+                <div class="card"><h2>🤖 2IA専用AI</h2><iframe src="https://udify.app/chatbot/92D920kUwjWcHbHb" style="height: 700px" frameborder="0"></iframe></div>`;
+      } else if (page === 'test') {
+        html = `<h1>📝 テストはんい</h1><div class="card"><p style="text-align:center;">テスト勉強、一緒に頑張ろう！</p></div>`;
       } else if (page === 'haihubutu') {
-        html = `<div class="card"><h2>📁 プリント</h2><iframe src="https://drive.google.com/embeddedfolderview?id=1UfqzRA8LqoqjK4_eUPLElhQr80cMGJFM#grid" style="width:100%; height:450px;" frameborder="0"></iframe></div>`;
+        html = `<h1>📁 配布プリント</h1><div class="card"><iframe src="https://drive.google.com/embeddedfolderview?id=1UfqzRA8LqoqjK4_eUPLElhQr80cMGJFM#grid" style="height:450px;"></iframe></div>`;
       }
       content.innerHTML = html;
       document.getElementById("nav-list").classList.remove("show");
+      window.scrollTo(0,0);
     }
 
     function updateTimers() {
@@ -358,11 +330,38 @@
       }
     }
 
+    // --- スライドショー アニメーション機能 ---
     const heroImages = ["https://rerizu2.github.io/oji-2025-1AI/文化祭.png", "https://rerizu2.github.io/oji-2025-1AI/体育大会.png", "https://rerizu2.github.io/oji-2025-1AI/校外学習.png", "https://rerizu2.github.io/oji-2025-1AI/球技大会.png"];
     let currentHeroIndex = 0;
-    function nextHero() { currentHeroIndex = (currentHeroIndex + 1) % heroImages.length; document.querySelector(".hero-img").src = heroImages[currentHeroIndex]; }
-    function prevHero() { currentHeroIndex = (currentHeroIndex - 1 + heroImages.length) % heroImages.length; document.querySelector(".hero-img").src = heroImages[currentHeroIndex]; }
+
+    function showHeroImage(index) {
+      const img = document.querySelector(".hero-img");
+      // 一旦透明にする
+      img.style.opacity = 0;
+      
+      // フェードアウトの時間を待ってからソースを変更し、フェードインさせる
+      setTimeout(() => {
+        img.src = heroImages[index];
+        // 画像の読み込みが完了してからフェードインさせるとより綺麗
+        img.onload = () => {
+          img.style.opacity = 1;
+        };
+      }, 400); // 0.8秒のトランジションの約半分
+    }
+
+    function nextHero() { 
+      currentHeroIndex = (currentHeroIndex + 1) % heroImages.length; 
+      showHeroImage(currentHeroIndex); 
+    }
+    
+    function prevHero() { 
+      currentHeroIndex = (currentHeroIndex - 1 + heroImages.length) % heroImages.length; 
+      showHeroImage(currentHeroIndex); 
+    }
+
+    // 自動スライド
     setInterval(nextHero, 5000);
+
     function toggleMenu() { document.getElementById("nav-list").classList.toggle("show"); }
 
     async function toggleQRReader() {
@@ -375,7 +374,7 @@
           document.getElementById("qr-video").play();
           container.style.display = "block"; isScanning = true;
           requestAnimationFrame(tick);
-        } catch (err) { alert("カメラが使えないようです。"); }
+        } catch (err) { alert("カメラが使えません。"); }
       }
     }
     function tick() {
@@ -386,11 +385,13 @@
         canvas.height = video.videoHeight; canvas.width = video.videoWidth;
         const ctx = canvas.getContext("2d"); ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-        if (code && code.data.trim().split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('') === targetHash) checkPasswordManual("V9hug");
+        if (code && code.data.trim().split('').map(c => (c.charCodeAt(0) * 3).toString(16)).join('') === targetHash) {
+          document.getElementById("password-input").value = "V9hug";
+          checkPassword();
+        }
       }
       requestAnimationFrame(tick);
     }
-    function checkPasswordManual(pass) { document.getElementById("password-input").value = pass; checkPassword(); }
     window.addEventListener('keydown', e => { if (e.ctrlKey && e.key.toLowerCase() === 'd') { e.preventDefault(); const newWin = window.open(); newWin.document.write('<pre>' + document.documentElement.outerHTML.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) + '</pre>'); } });
   </script>
 </body>
