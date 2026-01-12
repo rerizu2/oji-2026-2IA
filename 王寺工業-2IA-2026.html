@@ -80,9 +80,9 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between;
       border-radius: var(--header-radius); transition: all 0.3s ease;
     }
-    header .logo { font-size: 18px; font-weight: 800; color: white; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; }
+    header .logo { font-size: 18px; font-weight: 800; color: white; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; white-space: nowrap; }
     
-    .header-controls { display: flex; align-items: center; gap: 15px; }
+    .header-controls { display: flex; align-items: center; gap: 10px; }
     .lang-select { padding: 5px; border-radius: 10px; border: none; background: rgba(255,255,255,0.8); font-size: 12px; font-weight: bold; color: var(--primary-dark); cursor: pointer; }
 
     .switch-area { display: flex; align-items: center; gap: 8px; }
@@ -94,8 +94,22 @@
     input:checked + .slider:before { transform: translateX(20px); }
 
     nav ul { display: flex; list-style: none; gap: 5px; }
-    nav ul li a { color: white; text-decoration: none; font-weight: 700; cursor: pointer; padding: 8px 12px; border-radius: 12px; font-size: 13px; }
+    nav ul li a { color: white; text-decoration: none; font-weight: 700; cursor: pointer; padding: 8px 12px; border-radius: 12px; font-size: 13px; transition: 0.2s; }
     nav ul li a:hover { background: rgba(255,255,255,0.3); }
+
+    /* メニューボタン（スマホ・タブレット用） */
+    .menu-toggle {
+      display: none;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.3);
+      white-space: nowrap;
+    }
 
     /* ヒーローエリア */
     .hero { 
@@ -141,14 +155,46 @@
     footer { background: var(--primary); color: white; text-align: center; padding: 30px 0; margin-top: 50px; border-top-left-radius: 30px; border-top-right-radius: 30px; }
     body.theme-1ia footer { border-radius: 0; background: #222; }
 
-    @media (max-width: 768px) {
-      nav ul { display: none; flex-direction: column; background: var(--primary-dark); position: absolute; top: 60px; right: 10px; width: 180px; padding: 10px; border-radius: 10px; }
-      nav ul.show { display: flex; }
-      .menu-toggle { display: block; color: white; font-size: 24px; cursor: pointer; margin-left: 10px; }
+    /* --- スマホ・タブレット（1024px以下）のレスポンシブ設定 --- */
+    @media (max-width: 1024px) {
+      .menu-toggle { display: block; } /* メニューボタンを表示 */
+      
+      nav ul { 
+        display: none; 
+        flex-direction: column; 
+        background: white; 
+        position: absolute; 
+        top: 70px; 
+        right: 20px; 
+        width: 220px; 
+        padding: 15px; 
+        border-radius: 20px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        z-index: 2000;
+        border: 2px solid var(--primary);
+      }
+      
+      nav ul.show { display: flex; animation: fadeInDown 0.3s ease; }
+      
+      nav ul li a { 
+        color: var(--text-color); 
+        display: block; 
+        padding: 12px; 
+        border-bottom: 1px solid #eee;
+        border-radius: 0;
+      }
+      nav ul li:last-child a { border-bottom: none; }
+      nav ul li a:hover { background: #f0f7ff; color: var(--primary-dark); }
+
       .news-list li { flex-direction: column; gap: 4px; }
       .news-list li a { margin-left: 0 !important; margin-top: 5px; }
     }
-    .menu-toggle { display: none; }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
   </style>
 </head>
 <body>
@@ -184,13 +230,14 @@
           <option value="ko">한국어</option>
         </select>
         <div class="switch-area">
-          <span class="switch-label" id="theme-label">1IA風</span>
+          <span class="switch-label" id="theme-label" style="color:white; font-size:12px; font-weight:bold;">1IA風</span>
           <label class="switch">
             <input type="checkbox" id="design-toggle" onchange="toggleDesign()">
             <span class="slider"></span>
           </label>
         </div>
-        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+        <!-- スマホ・タブレット用メニューボタン -->
+        <div class="menu-toggle" id="mobile-menu-btn" onclick="toggleMenu()">☰ MENU</div>
       </div>
       <nav>
         <ul id="nav-list">
@@ -232,7 +279,6 @@
     let currentLang = 'ja';
     let currentPage = 'home';
 
-    /* --- ↓↓↓ ここに翻訳データとお知らせリストがあります ↓↓↓ --- */
     const translations = {
       ja: {
         loginTitle: "2IA Blue Members",
@@ -243,6 +289,7 @@
         orientH2: "画面を横向きにしてね！",
         orientP: "このページは横向きでの閲覧を推奨しています。",
         themeLabel: "1IA風",
+        menuBtn: "☰ メニュー",
         navHome: "🏠ホーム",
         navSchedule: "📅時間割",
         navCalendar: "🗓️カレンダー",
@@ -260,7 +307,6 @@
         footer1IA: "Classic 2IA Spirit!",
         newsTitle: "📢 おしらせ！",
         detailsText: "詳細はこちら",
-        /* --- お知らせリスト (URLを追加したい場合は url: "..." を入れます) --- */
         newsList: [
           { date: "2026/03/19", text: "新ホームページ追加機能！", url: "https://rerizu2.github.io/oji-2026-2IA/新機能.html"},
           { date: "2026/03/19", text: "2IAホームページを開放！" }
@@ -288,6 +334,7 @@
         orientH2: "Please rotate your screen!",
         orientP: "Landscape mode is highly recommended.",
         themeLabel: "1IA Style",
+        menuBtn: "☰ MENU",
         navHome: "🏠Home",
         navSchedule: "📅Schedule",
         navCalendar: "🗓️Calendar",
@@ -332,9 +379,10 @@
         orientH2: "화면을 가로로 돌려주세요!",
         orientP: "이 페이지는 가로 모드에 최적화되어 있습니다.",
         themeLabel: "1IA 스타일",
+        menuBtn: "☰ 메뉴",
         navHome: "🏠홈",
         navSchedule: "📅시간표",
-        navCalendar: "캘린더",
+        navCalendar: "🗓️캘린더",
         navIbento: "🎉이벤트",
         navGakusyuu: "📖학습/AI",
         navTest: "📝시험범위",
@@ -368,7 +416,6 @@
         printTitle: "📁 배포 프린트"
       }
     };
-    /* --- ↑↑↑ 翻訳データの終わり ↑↑↑ --- */
 
     function changeLanguage() {
       currentLang = document.getElementById('lang-select').value;
@@ -386,6 +433,7 @@
       document.getElementById('orient-h2').innerText = t.orientH2;
       document.getElementById('orient-p').innerText = t.orientP;
       document.getElementById('theme-label').innerText = t.themeLabel;
+      document.getElementById('mobile-menu-btn').innerText = t.menuBtn;
       document.getElementById('nav-home').innerText = t.navHome;
       document.getElementById('nav-schedule').innerText = t.navSchedule;
       document.getElementById('nav-calendar').innerText = t.navCalendar;
@@ -452,10 +500,8 @@
       let html = "";
       
       if (page === 'home') {
-        // お知らせリストのHTML生成
         let newsHtml = `<ul class="news-list">`;
         t.newsList.forEach(item => {
-          // item.url がある場合のみ、詳細リンクを表示する
           let link = item.url ? `<a href="${item.url}" target="_blank" style="margin-left: auto; color: var(--primary-dark); font-weight: bold; text-decoration: underline;">【${t.detailsText}】</a>` : "";
           newsHtml += `<li><span class="news-date">${item.date}</span><span>${item.text}</span>${link}</li>`;
         });
@@ -482,7 +528,7 @@
       }
       
       content.innerHTML = html;
-      document.getElementById("nav-list").classList.remove("show");
+      document.getElementById("nav-list").classList.remove("show"); // ページ遷移したらメニューを閉じる
       window.scrollTo(0,0);
     }
 
@@ -497,6 +543,8 @@
     function nextHero() { currentHeroIndex = (currentHeroIndex + 1) % heroImages.length; showHeroImage(currentHeroIndex); }
     function prevHero() { currentHeroIndex = (currentHeroIndex - 1 + heroImages.length) % heroImages.length; showHeroImage(currentHeroIndex); }
     setInterval(nextHero, 5000);
+
+    // メニュー開閉
     function toggleMenu() { document.getElementById("nav-list").classList.toggle("show"); }
 
     // --- QRリーダー ---
