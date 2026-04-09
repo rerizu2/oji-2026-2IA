@@ -247,6 +247,7 @@
           <li><a onclick="showPage('schedule')" id="nav-schedule">📅時間割</a></li>
           <li><a onclick="showPage('calendar')" id="nav-calendar">🗓️カレンダー</a></li>
           <li><a onclick="showPage('ibento')" id="nav-ibento">🎉イベント</a></li>
+          <li><a onclick="showPage('kakari')" id="nav-kakari">🖊️委員・係</a></li>
           <li><a onclick="showPage('gakusyuu')" id="nav-gakusyuu">📖学習/AI</a></li>
           <li><a onclick="showPage('test')" id="nav-test">📝テスト</a></li>
           <li><a onclick="showPage('haihubutu')" id="nav-haihubutu">📁プリント</a></li>
@@ -296,6 +297,7 @@
         navSchedule: "📅時間割",
         navCalendar: "🗓️カレンダー",
         navIbento: "🎉イベント",
+        navkakari: "🖊️委員・係",
         navGakusyuu: "📖学習/AI",
         navTest: "📝テスト",
         navHaihubutu: "📁プリント",
@@ -310,6 +312,7 @@
         newsTitle: "📢 おしらせ！",
         detailsText: "詳細はこちら",
         newsList: [
+          { date: "2026/04/09", text: "委員・係のメニューを追加！"},
           { date: "2026/03/19", text: "新ホームページ追加機能！", url: "https://rerizu2.github.io/oji-2026-2IA/新機能.html"},
           { date: "2026/03/19", text: "2IAホームページを開放！" }
         ],
@@ -325,7 +328,10 @@
         aiTitle: "🤖 2IA専用AI",
         testTitle: "📝 テストはんい",
         testP: "テスト勉強、一緒に頑張ろう！",
-        printTitle: "📁 配布プリント"
+        printTitle: "📁 配布プリント",
+        urlLink: "URLはこちら",
+        comingSoon: "準備中...",
+        kakariDesc: "係・委員の名簿です。"
       },
       en: {
         loginTitle: "2IA Blue Members",
@@ -341,6 +347,7 @@
         navSchedule: "📅Schedule",
         navCalendar: "🗓️Calendar",
         navIbento: "🎉Events",
+        navkakari: "🖊️Committees",
         navGakusyuu: "📖Study/AI",
         navTest: "📝Tests",
         navHaihubutu: "📁Prints",
@@ -355,11 +362,12 @@
         newsTitle: "📢 News",
         detailsText: "Details here",
         newsList: [
-          { date: "2026/03/19", text: "New homepage added function!", url: "https://rerizu2.github.io/oji-2026-2IA/新機能.html"},
+          { date: "2026/04/09", text: "Added menu for committees and staff!"},
+          { date: "2026/03/19", text: "New homepage features!", url: "https://rerizu2.github.io/oji-2026-2IA/新機能.html"},
           { date: "2026/03/19", text: "2IA homepage is now open!" }
         ],
         aboutTitle: "About 2IA Members Page",
-        aboutP: "This page is for 2IA students and parents only. Check materials from Google Chat here. Contact Ichimasa for feedback.",
+        aboutP: "This page is for 2IA students and parents only. Check materials from Google Chat here.",
         qrTitle: "Page QR Code",
         alertPass: "Incorrect Password",
         emptyEvent: "Currently no events planned.",
@@ -370,7 +378,10 @@
         aiTitle: "🤖 2IA Custom AI",
         testTitle: "📝 Test Scope",
         testP: "Let's study hard together!",
-        printTitle: "📁 Distributed Prints"
+        printTitle: "📁 Distributed Prints",
+        urlLink: "Click here for URL",
+        comingSoon: "Coming Soon...",
+        kakariDesc: "List of committees and class staff."
       },
       ko: {
         loginTitle: "2IA Blue Members",
@@ -386,6 +397,7 @@
         navSchedule: "📅시간표",
         navCalendar: "🗓️캘린더",
         navIbento: "🎉이벤트",
+        navkakari: "🖊️위원·계",
         navGakusyuu: "📖학습/AI",
         navTest: "📝시험범위",
         navHaihubutu: "📁프린트",
@@ -400,11 +412,12 @@
         newsTitle: "📢 공지사항",
         detailsText: "자세한 내용은 여기로",
         newsList: [
+          { date: "2026/04/09", text: "위원·계 메뉴 추가!"},
           { date: "2026/03/19", text: "새로운 홈페이지 추가 기능!", url: "https://rerizu2.github.io/oji-2026-2IA/新機能.html"},
           { date: "2026/03/19", text: "2IA 홈페이지를 개방!" }
         ],
         aboutTitle: "2IA 멤버스 페이지에 대하여",
-        aboutP: "이 페이지는 2IA 학생 및 학부모 전용입니다. Google Chat 자료를 확인할 수 있습니다. 의견은 이치마사에게.",
+        aboutP: "이 페이지는 2IA 학생 및 학부모 전용입니다.",
         qrTitle: "페이지 QR 코드",
         alertPass: "비밀번호가 틀렸습니다",
         emptyEvent: "현재 준비된 이벤트가 없습니다.",
@@ -415,7 +428,10 @@
         aiTitle: "🤖 2IA 전용 AI",
         testTitle: "📝 시험 범위",
         testP: "시험 공부, 함께 힘내요!",
-        printTitle: "📁 배포 프린트"
+        printTitle: "📁 배포 프린트",
+        urlLink: "URL은 여기로",
+        comingSoon: "준비 중...",
+        kakariDesc: "위원 및 계 명단입니다."
       }
     };
 
@@ -440,6 +456,7 @@
       document.getElementById('nav-schedule').innerText = t.navSchedule;
       document.getElementById('nav-calendar').innerText = t.navCalendar;
       document.getElementById('nav-ibento').innerText = t.navIbento;
+      document.getElementById('nav-kakari').innerText = t.navkakari;
       document.getElementById('nav-gakusyuu').innerText = t.navGakusyuu;
       document.getElementById('nav-test').innerText = t.navTest;
       document.getElementById('nav-haihubutu').innerText = t.navHaihubutu;
@@ -515,22 +532,24 @@
       } else if (page === 'schedule') {
         html = `<h1>${t.navSchedule}</h1><div class="card"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQv5WpolITwLMOUMj4pWlA5J9coAKDJLkcr_DCmpTvOqsYyNOTnFRbOKnXM73czN4MpaDaUT7xVIelM/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false" height="400"></iframe></div>`;
       } else if (page === 'calendar') {
-        html = `<h1>${t.navCalendar}</h1><div class="card"><iframe src="https://calendar.google.com/calendar/embed?src=youmuyizheng%40gmail.com&ctz=Asia%2FTokyo" height="500"></iframe></div>`;
+        html = `<h1>${t.navCalendar}</h1><div class="card"><iframe src="https://calendar.google.com/calendar/embed?src=oji.information.1ia%40gmail.com&ctz=Asia%2FTokyo" height="500"></iframe><br><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQv5WpolITwLMOUMj4pWlA5J9coAKDJLkcr_DCmpTvOqsYyNOTnFRbOKnXM73czN4MpaDaUT7xVIelM/pubhtml?gid=1502073658&amp;single=true&amp;widget=true&amp;headers=false" height="800"></iframe></div>`;
       } else if (page === 'ibento') {
         html = `<h1>${t.navIbento}</h1><div class="card"><p style="text-align:center;">${t.emptyEvent}</p></div>`;
+      } else if (page === 'kakari') {
+        html = `<h1>${t.navkakari}</h1><div class="card"><p style="margin-bottom:10px; text-align:center;">${t.kakariDesc}</p><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vR_C8R7ezRBsUXx1Z6JdiXx08e5xA27VRYHB3w-G6lpUsmL1ymS8GtG7PKfB705dqZitdbCiRZVQlZz/pubhtml?widget=true&amp;headers=false" height="800"></iframe><br><a href="https://docs.google.com/spreadsheets/d/1FJCBVklkPI5-njjldxu1fFYT7fIOvf2YLZ3BBuN0WMc/edit?gid=0#gid=0" target="_blank" style="display:block; text-align:center; margin-top:10px; color:var(--primary-dark); font-weight:bold;">${t.urlLink}</a></div>`;
       } else if (page === 'gakusyuu') {
         html = `<h1>${t.studyTitle}</h1>
                 <div class="card"><h2>${t.seatSystem}</h2><iframe src="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" style="height: 700px" frameborder="0"></iframe><a href="https://rerizu2.github.io/oji-2025-1AI/%E5%B8%AD%E6%9B%BF%E3%81%88.html" target="_blank" style="display:block; text-align:center; margin-top:10px; color:var(--primary-dark); font-weight:bold;">${t.seatNewTab}</a></div>
-                <div class="card"><h2>${t.submitSystem}</h2><a href="https://script.google.com/macros/s/AKfycby3CMK9N_sFcUB1SgArFMoSUWzZo7zFp_adZpb-KkC4OPI9eM4dY0Up-jw0jxMqUgbu/exec" target="_blank" style="display:block; text-align:center; margin-top:10px; color:var(--primary-dark); font-weight:bold;">${t.submitSystem}</a></div>
+                <div class="card"><h2>${t.submitSystem}</h2><a href="https://script.google.com/macros/s/AKfycbyPmoHYeSGFKXwrroChnk04Scgjw5TezaQe78at3gdQXZlXUO8LVCkxOKDpp7398aYV/exec" target="_blank" style="display:block; text-align:center; margin-top:10px; color:var(--primary-dark); font-weight:bold;">${t.submitSystem}</a></div>
                 <div class="card"><h2>${t.aiTitle}</h2><iframe src="https://udify.app/chatbot/92D920kUwjWcHbHb" style="height: 700px" frameborder="0"></iframe></div>`;
       } else if (page === 'test') {
         html = `<h1>${t.testTitle}</h1><div class="card"><p style="text-align:center;">${t.testP}</p></div>`;
       } else if (page === 'haihubutu') {
-        html = `<h1>${t.printTitle}</h1><div class="card"><iframe src="https://drive.google.com/embeddedfolderview?id=1UfqzRA8LqoqjK4_eUPLElhQr80cMGJFM#grid" style="height:450px;"></iframe></div>`;
+        html = `<h1>${t.printTitle}</h1><div class="card"><iframe src="https://drive.google.com/embeddedfolderview?id=1uDqKuYJx3aQ4avxmkW9A7JTlDQXMYhNB#grid" style="height:450px;"></iframe></div>`;
       }
       
       content.innerHTML = html;
-      document.getElementById("nav-list").classList.remove("show"); // ページ遷移したらメニューを閉じる
+      document.getElementById("nav-list").classList.remove("show");
       window.scrollTo(0,0);
     }
 
