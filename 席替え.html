@@ -2,8 +2,7 @@
 <html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>7×7グリッド 席替えツール</title>
-<!-- PDF変換ライブラリ -->
+<title>7×7グリッド 席替えツール（状態維持版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 body {
@@ -25,7 +24,6 @@ body {
 }
 #viewSourceBtn:hover { background: #555; }
 
-/* ソース表示用モーダル */
 #sourceOverlay {
   display: none;
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -110,18 +108,16 @@ h2, h3 { margin-top: 0; text-align: center; border-bottom: 2px solid #eee; paddi
   <div id="sourceBox"></div>
 </div>
 
-<!-- 左側：入力エリア -->
 <div class="container" style="width:280px;">
   <h2>名前入力</h2>
   <textarea id="nameInput" placeholder="名前を改行して入力"></textarea>
-  <button id="addNamesBtn" style="width:100%; margin-top:10px;">表に反映</button>
+  <button id="addNamesBtn" style="width:100%; margin-top:10px;">名簿を更新</button>
   <div id="miniSeating"></div>
   <p style="font-size:0.8em; color:#666; text-align:center; margin-top:10px;">
     【ミニ座席】<br>緑のマスは「空白」になり、<br>座席は詰められません。
   </p>
 </div>
 
-<!-- 中央エリア -->
 <div style="flex:1; min-width:720px;">
   <div class="container">
     <div class="control-panel">
@@ -150,7 +146,6 @@ h2, h3 { margin-top: 0; text-align: center; border-bottom: 2px solid #eee; paddi
   </div>
 </div>
 
-<!-- 右側：出席番号管理 -->
 <div class="container" style="width:280px;">
   <h3>出席番号管理</h3>
   <table id="studentTable">
@@ -163,14 +158,15 @@ h2, h3 { margin-top: 0; text-align: center; border-bottom: 2px solid #eee; paddi
 </div>
 
 <script>
-/* ===== 基本設定：7×7に変更 ===== */
 const ROWS = 7;
 const COLS = 7;
 const tbody = document.querySelector("#studentTable tbody");
 const areaStudent = document.getElementById("seatingAreaStudent");
 const areaTeacher = document.getElementById("seatingAreaTeacher");
 const hiddenSeats = new Set();
-const fixedStudents = new Set();
+
+// 現在の並び順を保持する配列
+let currentStudentOrder = [];
 
 /* ===== ソース表示機能 ===== */
 const viewBtn = document.getElementById("viewSourceBtn");
@@ -195,25 +191,30 @@ function createRow(num = "", name = "", checked=false) {
       <span contenteditable="true" style="flex:1; text-align:left;">${name}</span>
     </td>
     <td><input type="checkbox" ${checked?"checked":""}></td>`;
+  
   const checkInput = tr.querySelector("input");
   checkInput.addEventListener("change", ()=>{
     tr.classList.toggle("checked", checkInput.checked);
-    updateFixedSet();
+    syncOrderFromTable(); // チェック状態を最新の並び順に反映
     renderAll();
   });
   if(checked) tr.classList.add("checked");
   tbody.appendChild(tr);
 }
 
-function updateFixedSet() {
-  fixedStudents.clear();
-  tbody.querySelectorAll("tr").forEach(tr => {
-    const name = tr.querySelectorAll("span")[1].textContent.trim();
-    if(tr.querySelector("input").checked && name) fixedStudents.add(name);
+// テーブル（右側）の情報に基づいて、現在の並び順配列の状態（名前・固定）を同期する
+function syncOrderFromTable() {
+  const tableData = getCurrentStudentsFromTable();
+  currentStudentOrder.forEach(s => {
+    const match = tableData.find(t => t.num === s.num);
+    if(match) {
+      s.name = match.name;
+      s.checked = match.checked;
+    }
   });
 }
 
-function getCurrentStudents(){
+function getCurrentStudentsFromTable(){
   const arr=[];
   tbody.querySelectorAll("tr").forEach(tr=>{
     const spans = tr.querySelectorAll("span");
@@ -245,20 +246,37 @@ function renderMiniSeats() {
   }
 }
 
-function renderAll(doShuffle = false) {
-  let students = getCurrentStudents().filter(s => s.name !== "");
-  if(doShuffle) students = shuffle(students);
-  const fixedList = students.filter(s => fixedStudents.has(s.name));
-  const freeList = students.filter(s => !fixedStudents.has(s.name));
-  const ordered = [...fixedList, ...freeList];
+// 席替え実行ボタンが押された時だけ呼ばれる
+function doShuffleProcess() {
+  const allStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
+  const fixedOnes = allStudents.filter(s => s.checked);
+  const flexOnes = allStudents.filter(s => !s.checked);
+  
+  // シャッフル
+  for(let i=flexOnes.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [flexOnes[i], flexOnes[j]] = [flexOnes[j], flexOnes[i]];
+  }
+  
+  currentStudentOrder = [...fixedOnes, ...flexOnes];
+  renderAll();
+}
+
+function renderAll() {
+  // 並び順がない（初期状態）場合はテーブルから読み込む
+  if(currentStudentOrder.length === 0) {
+    currentStudentOrder = getCurrentStudentsFromTable().filter(s => s.name !== "");
+  }
 
   const seatMap = [];
   for(let r=0; r<ROWS; r++) seatMap[r] = new Array(COLS).fill(null);
+  
   let sIdx = 0;
   for(let r=0; r<ROWS; r++) {
     for(let c=0; c<COLS; c++) {
-      if(!hiddenSeats.has(`${r}-${c}`) && sIdx < ordered.length) {
-        seatMap[r][c] = ordered[sIdx]; sIdx++;
+      if(!hiddenSeats.has(`${r}-${c}`) && sIdx < currentStudentOrder.length) {
+        seatMap[r][c] = currentStudentOrder[sIdx];
+        sIdx++;
       }
     }
   }
@@ -281,7 +299,7 @@ function renderView(container, seatMap, isReverse) {
         const s = seatMap[r][c];
         if(s) {
           seatEl.innerHTML = `<div>${s.num}</div><div style="font-weight:bold">${s.name}</div>`;
-          if(fixedStudents.has(s.name)) seatEl.classList.add("fixed");
+          if(s.checked) seatEl.classList.add("fixed");
         }
       }
       rowDiv.appendChild(seatEl);
@@ -290,43 +308,48 @@ function renderView(container, seatMap, isReverse) {
   });
 }
 
-function shuffle(a) {
-  const res = [...a];
-  for(let i=res.length-1; i>0; i--){
-    const j = Math.floor(Math.random()*(i+1)); [res[i], res[j]] = [res[j], res[i]];
-  }
-  return res;
-}
-
 document.getElementById("addNamesBtn").addEventListener("click", () => {
   const names = document.getElementById("nameInput").value.split("\n").filter(n=>n.trim()!=="");
-  tbody.innerHTML = ""; names.forEach((n, i) => createRow(i+1, n));
-  updateFixedSet(); renderAll();
+  tbody.innerHTML = "";
+  names.forEach((n, i) => createRow(i+1, n));
+  currentStudentOrder = getCurrentStudentsFromTable().filter(s => s.name !== "");
+  renderAll();
 });
 
 document.getElementById("shuffleBtn").addEventListener("click", () => {
   const times = parseInt(document.getElementById("shuffleCount").value);
   let count = 0; const status = document.getElementById("statusText");
   const timer = setInterval(() => {
-    renderAll(true); count++; status.textContent = `席替え中... (${count}/${times})`;
-    if(count >= times) { clearInterval(timer); status.textContent = "席替え完了！"; setTimeout(()=> status.textContent="", 2000); }
+    doShuffleProcess();
+    count++;
+    status.textContent = `席替え中... (${count}/${times})`;
+    if(count >= times) { 
+      clearInterval(timer); 
+      status.textContent = "席替え完了！"; 
+      setTimeout(()=> status.textContent="", 2000); 
+    }
   }, 100);
 });
 
 document.getElementById("pdfBtn").addEventListener("click", () => {
   const element = document.getElementById("teacherPdfArea");
-  const opt = { margin: 10, filename: '座席表_7x7.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } };
+  const opt = { margin: 10, filename: '座席表.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } };
   html2pdf().set(opt).from(element).save();
 });
 
 document.getElementById("saveBtn").addEventListener("click", () => {
-  const data = { students: getCurrentStudents(), hidden: Array.from(hiddenSeats) };
-  localStorage.setItem("seatingData_7x7", JSON.stringify(data));
+  syncOrderFromTable();
+  const data = { 
+    students: currentStudentOrder, 
+    tableData: getCurrentStudentsFromTable(),
+    hidden: Array.from(hiddenSeats) 
+  };
+  localStorage.setItem("seatingData_v2", JSON.stringify(data));
   alert("保存しました");
 });
 
 document.getElementById("resetBtn").addEventListener("click", () => {
-  if(confirm("初期化しますか？")) { localStorage.removeItem("seatingData_7x7"); location.reload(); }
+  if(confirm("初期化しますか？")) { localStorage.removeItem("seatingData_v2"); location.reload(); }
 });
 
 document.getElementById("addRowBtn").addEventListener("click", () => createRow(tbody.rows.length+1, ""));
@@ -337,16 +360,18 @@ window.addEventListener("DOMContentLoaded", () => {
     const opt = document.createElement("option"); opt.value = i; opt.textContent = i + "回";
     if(i===10) opt.selected = true; sel.appendChild(opt);
   }
-  const saved = localStorage.getItem("seatingData_7x7");
+  const saved = localStorage.getItem("seatingData_v2");
   if(saved) {
     const data = JSON.parse(saved);
-    data.students.forEach(s => createRow(s.num, s.name, s.checked));
+    data.tableData.forEach(s => createRow(s.num, s.name, s.checked));
+    currentStudentOrder = data.students;
     if(data.hidden) data.hidden.forEach(h => hiddenSeats.add(h));
   } else { 
-    // 初期状態：空の行を作成
     for(let i=1; i<=40; i++) createRow(i, ""); 
   }
-  updateFixedSet(); renderMiniSeats(); renderAll();
+  renderMiniSeats(); 
+  renderAll();
 });
 </script>
-</body></html>
+</body>
+</html>
