@@ -2,7 +2,7 @@
 <html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>7×7グリッド 席替えツール（ふりがな対応版）</title>
+<title>7×7グリッド 席替えツール（PDF拡大版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 body {
@@ -11,8 +11,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 30px;
-  padding: 30px;
+  gap: 20px;
+  padding: 20px;
   flex-wrap: wrap;
 }
 #viewSourceBtn {
@@ -22,73 +22,77 @@ body {
   border-radius: 6px; cursor: pointer;
   z-index: 100;
 }
-#viewSourceBtn:hover { background: #555; }
 
-#sourceOverlay {
-  display: none;
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.85); color: #fff; z-index: 1000;
-  padding: 40px; box-sizing: border-box;
-}
-#sourceBox {
-  width: 100%; height: 90%; background: #1e1e1e; color: #d4d4d4;
-  font-family: 'Consolas', 'Monaco', monospace; 
-  padding: 15px; overflow: auto; white-space: pre;
-  border: 1px solid #444; border-radius: 8px; font-size: 13px; line-height: 1.5;
-}
-.modal-close {
-  position: absolute; top: 10px; right: 50px;
-  background: #ff5252; color: white; border: none;
-  padding: 8px 15px; border-radius: 4px; cursor: pointer;
-}
+/* メインレイアウト */
+.side-panel { width: 300px; }
+.main-panel { flex: 1; min-width: 800px; }
 
 .container {
   background: #fff; border-radius: 10px; padding: 20px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;
 }
+
+/* ボタン・コントロール */
 .control-panel {
   display: flex; justify-content: center; align-items: center;
   gap: 10px; margin-bottom: 15px; flex-wrap: wrap;
 }
 select, button, input {
-  padding: 6px 10px; font-size: 1em; border-radius: 6px; border: 1px solid #888;
+  padding: 8px 12px; font-size: 1em; border-radius: 6px; border: 1px solid #888;
 }
-button {
-  background: linear-gradient(180deg, #e0e0e0, #bdbdbd);
-  cursor: pointer;
-}
+button { background: linear-gradient(180deg, #e0e0e0, #bdbdbd); cursor: pointer; }
 button:hover { background: linear-gradient(180deg, #f0f0f0, #d0d0d0); }
-
-#pdfBtn { background: linear-gradient(180deg, #ff8a65, #e64a19); color: white; border: none; }
+#pdfBtn { background: linear-gradient(180deg, #ff8a65, #e64a19); color: white; border: none; font-weight: bold; }
 #pdfBtn:hover { background: linear-gradient(180deg, #ffab91, #f4511e); }
 
+/* 入力エリア */
 textarea {
-  width: 100%; height: 150px; font-size: 14px; box-sizing: border-box;
+  width: 100%; height: 120px; font-size: 14px; box-sizing: border-box;
   padding: 8px; border-radius: 6px; border: 1px solid #bbb; resize: none;
 }
+
+/* 座席の基本スタイル */
 .teacher { 
-  text-align:center; font-weight:bold; padding:8px; 
+  text-align:center; font-weight:bold; padding:10px; 
   border:2px solid #333; background:#e1f0ff; 
-  width: 250px; margin: 10px auto;
+  width: 300px; margin: 15px auto;
 }
 .row { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+
 .seat { 
-  width: 95px; height: 65px; background:#fff; border:1px solid #555; 
+  width: 100px; height: 65px; background:#fff; border:1px solid #444; 
   border-radius:4px; display:flex; align-items:center; justify-content:center; 
-  flex-direction:column; font-size: 0.85em; overflow: hidden;
+  flex-direction:column; position: relative;
 }
 .seat.fixed { background:#d6f5ff !important; -webkit-print-color-adjust: exact; }
 .seat.hidden-spacer { border:1px dashed #ccc; background:rgba(0,0,0,0.02); }
 
-/* ふりがな（ルビ）のスタイル */
+/* ふりがな */
 ruby { ruby-align: center; }
-rt { font-size: 0.65em; font-weight: normal; color: #444; }
+rt { font-size: 0.6em; font-weight: normal; color: #333; }
 
+/* PDF用エリア設定 (A4横サイズを意識) */
+#teacherPdfArea {
+  width: 1050px; /* A4横に収まりつつ大きく表示する幅 */
+  margin: 0 auto;
+  padding: 20px;
+  background: white;
+}
+#teacherPdfArea .seat {
+  width: 130px;  /* PDF版は座席を大きく */
+  height: 85px;
+  font-size: 1.1em;
+}
+#teacherPdfArea .row { gap: 12px; margin-bottom: 12px; }
+#teacherPdfArea .view-label { font-size: 1.5em; margin-bottom: 20px; }
+
+/* テーブルスタイル */
 table { border-collapse: collapse; width: 100%; margin-top: 10px; table-layout: fixed; }
-th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.85em; overflow: hidden; }
+th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.85em; }
 th { background:#e1f0ff; }
 tr.checked { background:#d7f8d7; }
 
+/* ミニ座席 */
 #miniSeating { margin-top: 15px; display:flex; flex-direction:column; gap:5px; }
 .miniRow { display:flex; justify-content:center; gap:5px; }
 .miniSeat { 
@@ -98,8 +102,17 @@ tr.checked { background:#d7f8d7; }
 }
 .miniSeat.selected { background:#a5d6a7 !important; }
 
-h2, h3 { margin-top: 0; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 5px;}
 .view-label { text-align: center; font-weight: bold; color: #1976d2; margin-bottom: 10px; }
+
+/* ソース表示モーダル */
+#sourceOverlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85); color: #fff; z-index: 1000; padding: 40px; box-sizing: border-box;
+}
+#sourceBox {
+  width: 100%; height: 90%; background: #1e1e1e; color: #d4d4d4;
+  font-family: monospace; padding: 15px; overflow: auto; white-space: pre; border-radius: 8px;
+}
 </style>
 </head>
 <body>
@@ -107,28 +120,41 @@ h2, h3 { margin-top: 0; text-align: center; border-bottom: 2px solid #eee; paddi
 <button id="viewSourceBtn">ソース表示</button>
 
 <div id="sourceOverlay">
-  <button class="modal-close" id="closeSourceBtn">閉じる</button>
+  <button onclick="document.getElementById('sourceOverlay').style.display='none'" style="position:absolute; top:10px; right:50px; background:#ff5252; color:white;">閉じる</button>
   <div id="sourceBox"></div>
 </div>
 
-<div class="container" style="width:300px;">
-  <h2>名前入力</h2>
-  <textarea id="nameInput" placeholder="田中太郎 たなかたろう&#10;佐藤花子 さとうはなこ&#10;（名前とふりがなをスペースで区切る）"></textarea>
-  <button id="addNamesBtn" style="width:100%; margin-top:10px;">名簿を更新</button>
-  <div id="miniSeating"></div>
-  <p style="font-size:0.8em; color:#666; text-align:center; margin-top:10px;">
-    【ミニ座席】<br>緑のマスは「空白」になり、<br>座席は詰められません。
-  </p>
+<div class="side-panel">
+  <div class="container">
+    <h2>名前入力</h2>
+    <textarea id="nameInput" placeholder="田中太郎 たなかたろう&#10;佐藤花子 さとうはなこ&#10;（名前とふりがなをスペースで区切る）"></textarea>
+    <button id="addNamesBtn" style="width:100%; margin-top:10px;">名簿を更新</button>
+    <div id="miniSeating"></div>
+    <p style="font-size:0.8em; color:#666; text-align:center; margin-top:10px;">
+      【ミニ座席】<br>緑のマスは「空白」になり、<br>座席は詰められません。
+    </p>
+  </div>
+
+  <div class="container">
+    <h3>出席番号管理</h3>
+    <table id="studentTable">
+      <thead>
+        <tr><th style="width:30px;">番</th><th>氏名</th><th>ふりがな</th><th style="width:35px;">固定</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button id="addRowBtn" style="width:100%; margin-top:10px;">＋ 行を追加</button>
+  </div>
 </div>
 
-<div style="flex:1; min-width:760px;">
+<div class="main-panel">
   <div class="container">
     <div class="control-panel">
       <label>シャッフル：</label>
       <select id="shuffleCount"></select>
       <button id="shuffleBtn">席替え実行</button>
       <button id="saveBtn">💾 保存</button>
-      <button id="pdfBtn">📄 下の表をPDF出力</button>
+      <button id="pdfBtn">📄 用紙いっぱいにPDF出力</button>
       <button id="resetBtn">🗑 削除</button>
     </div>
     <p id="statusText" style="text-align:center; height:1.2em; color:#d32f2f; font-weight:bold;"></p>
@@ -140,24 +166,13 @@ h2, h3 { margin-top: 0; text-align: center; border-bottom: 2px solid #eee; paddi
     <div id="seatingAreaStudent"></div>
   </div>
 
-  <div class="container" id="teacherPdfArea">
-    <div style="padding: 20px; background: white;">
-      <div class="view-label">【教職員用表示】（教卓が下・上下左右反転）</div>
+  <div class="container" style="overflow-x: auto;">
+    <div id="teacherPdfArea">
+      <div class="view-label" contenteditable="true">令和　年度 ○年○組 座席表（教職員用）</div>
       <div id="seatingAreaTeacher"></div>
       <div class="teacher">教卓</div>
     </div>
   </div>
-</div>
-
-<div class="container" style="width:320px;">
-  <h3>出席番号管理</h3>
-  <table id="studentTable">
-    <thead>
-      <tr><th style="width:30px;">番</th><th>氏名</th><th>ふりがな</th><th style="width:35px;">固定</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button id="addRowBtn" style="width:100%; margin-top:10px;">＋ 行を追加</button>
 </div>
 
 <script>
@@ -167,38 +182,28 @@ const tbody = document.querySelector("#studentTable tbody");
 const areaStudent = document.getElementById("seatingAreaStudent");
 const areaTeacher = document.getElementById("seatingAreaTeacher");
 const hiddenSeats = new Set();
-
-// 現在の並び順を保持する配列
 let currentStudentOrder = [];
 
-/* ===== ソース表示機能 ===== */
-const viewBtn = document.getElementById("viewSourceBtn");
-const closeBtn = document.getElementById("closeSourceBtn");
-const overlay = document.getElementById("sourceOverlay");
-const sourceBox = document.getElementById("sourceBox");
-
-viewBtn.addEventListener("click", () => {
+/* ソース表示 */
+document.getElementById("viewSourceBtn").addEventListener("click", () => {
   let html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
   html = html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  sourceBox.innerHTML = html;
-  overlay.style.display = "block";
+  document.getElementById("sourceBox").innerHTML = html;
+  document.getElementById("sourceOverlay").style.display = "block";
 });
-closeBtn.addEventListener("click", () => { overlay.style.display = "none"; });
 
-/* ===== 席替えロジック ===== */
+/* テーブルに行追加 */
 function createRow(num = "", name = "", kana = "", checked=false) {
   const tr = document.createElement("tr");
   tr.innerHTML = `
-    <td><span contenteditable="true" style="display:block; width:100%;">${num}</span></td>
-    <td><span contenteditable="true" style="display:block; width:100%; text-align:left;">${name}</span></td>
-    <td><span contenteditable="true" style="display:block; width:100%; text-align:left;">${kana}</span></td>
+    <td><span contenteditable="true" style="display:block;">${num}</span></td>
+    <td><span contenteditable="true" style="display:block; text-align:left;">${name}</span></td>
+    <td><span contenteditable="true" style="display:block; text-align:left;">${kana}</span></td>
     <td><input type="checkbox" ${checked?"checked":""}></td>`;
   
-  const checkInput = tr.querySelector("input");
-  checkInput.addEventListener("change", ()=>{
-    tr.classList.toggle("checked", checkInput.checked);
-    syncOrderFromTable();
-    renderAll();
+  tr.querySelector("input").addEventListener("change", ()=>{
+    tr.classList.toggle("checked", tr.querySelector("input").checked);
+    syncOrderFromTable(); renderAll();
   });
   if(checked) tr.classList.add("checked");
   tbody.appendChild(tr);
@@ -206,14 +211,9 @@ function createRow(num = "", name = "", kana = "", checked=false) {
 
 function syncOrderFromTable() {
   const tableData = getCurrentStudentsFromTable();
-  // tableDataにある情報をcurrentStudentOrderに反映
   currentStudentOrder.forEach(s => {
     const match = tableData.find(t => t.num === s.num);
-    if(match) {
-      s.name = match.name;
-      s.kana = match.kana;
-      s.checked = match.checked;
-    }
+    if(match) { s.name = match.name; s.kana = match.kana; s.checked = match.checked; }
   });
 }
 
@@ -231,8 +231,7 @@ function getCurrentStudentsFromTable(){
 }
 
 function renderMiniSeats() {
-  const mini = document.getElementById("miniSeating");
-  mini.innerHTML = "";
+  const mini = document.getElementById("miniSeating"); mini.innerHTML = "";
   for(let r=0; r<ROWS; r++){
     const rowDiv = document.createElement("div"); rowDiv.className = "miniRow";
     for(let c=0; c<COLS; c++) {
@@ -240,8 +239,7 @@ function renderMiniSeats() {
       const key = `${r}-${c}`;
       if(hiddenSeats.has(key)) s.classList.add("selected");
       s.addEventListener("click", () => {
-        if(hiddenSeats.has(key)) hiddenSeats.delete(key);
-        else hiddenSeats.add(key);
+        if(hiddenSeats.has(key)) hiddenSeats.delete(key); else hiddenSeats.add(key);
         renderMiniSeats(); renderAll();
       });
       rowDiv.appendChild(s);
@@ -254,12 +252,10 @@ function doShuffleProcess() {
   const allStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
   const fixedOnes = allStudents.filter(s => s.checked);
   const flexOnes = allStudents.filter(s => !s.checked);
-  
   for(let i=flexOnes.length-1; i>0; i--){
     const j = Math.floor(Math.random()*(i+1));
     [flexOnes[i], flexOnes[j]] = [flexOnes[j], flexOnes[i]];
   }
-  
   currentStudentOrder = [...fixedOnes, ...flexOnes];
   renderAll();
 }
@@ -268,10 +264,8 @@ function renderAll() {
   if(currentStudentOrder.length === 0) {
     currentStudentOrder = getCurrentStudentsFromTable().filter(s => s.name !== "");
   }
-
   const seatMap = [];
   for(let r=0; r<ROWS; r++) seatMap[r] = new Array(COLS).fill(null);
-  
   let sIdx = 0;
   for(let r=0; r<ROWS; r++) {
     for(let c=0; c<COLS; c++) {
@@ -299,10 +293,9 @@ function renderView(container, seatMap, isReverse) {
       } else {
         const s = seatMap[r][c];
         if(s) {
-          // ルビ（ふりがな）タグを使用して表示
           seatEl.innerHTML = `
-            <div style="font-size:0.7em; color:#666;">${s.num}</div>
-            <div style="font-weight:bold; font-size:1.1em;">
+            <div style="font-size:0.65em; color:#666; position:absolute; top:2px; left:4px;">${s.num}</div>
+            <div style="font-weight:bold;">
               <ruby>${s.name}<rt>${s.kana}</rt></ruby>
             </div>`;
           if(s.checked) seatEl.classList.add("fixed");
@@ -314,15 +307,13 @@ function renderView(container, seatMap, isReverse) {
   });
 }
 
+/* 各種イベント */
 document.getElementById("addNamesBtn").addEventListener("click", () => {
   const lines = document.getElementById("nameInput").value.split("\n").filter(l=>l.trim()!=="");
   tbody.innerHTML = "";
   lines.forEach((line, i) => {
-    // スペースかタブで分割して「名前」と「ふりがな」を取得
     const parts = line.trim().split(/[\s　]+/);
-    const name = parts[0] || "";
-    const kana = parts[1] || "";
-    createRow(i+1, name, kana);
+    createRow(i+1, parts[0] || "", parts[1] || "");
   });
   currentStudentOrder = getCurrentStudentsFromTable().filter(s => s.name !== "");
   renderAll();
@@ -332,36 +323,34 @@ document.getElementById("shuffleBtn").addEventListener("click", () => {
   const times = parseInt(document.getElementById("shuffleCount").value);
   let count = 0; const status = document.getElementById("statusText");
   const timer = setInterval(() => {
-    doShuffleProcess();
-    count++;
+    doShuffleProcess(); count++;
     status.textContent = `席替え中... (${count}/${times})`;
-    if(count >= times) { 
-      clearInterval(timer); 
-      status.textContent = "席替え完了！"; 
-      setTimeout(()=> status.textContent="", 2000); 
-    }
-  }, 100);
+    if(count >= times) { clearInterval(timer); status.textContent = "席替え完了！"; setTimeout(()=> status.textContent="", 2000); }
+  }, 80);
 });
 
+// PDF出力設定
 document.getElementById("pdfBtn").addEventListener("click", () => {
   const element = document.getElementById("teacherPdfArea");
-  const opt = { margin: 10, filename: '座席表.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } };
+  const opt = {
+    margin: [10, 5, 10, 5], // 上, 左, 下, 右
+    filename: '座席表.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+  };
   html2pdf().set(opt).from(element).save();
 });
 
 document.getElementById("saveBtn").addEventListener("click", () => {
   syncOrderFromTable();
-  const data = { 
-    students: currentStudentOrder, 
-    tableData: getCurrentStudentsFromTable(),
-    hidden: Array.from(hiddenSeats) 
-  };
-  localStorage.setItem("seatingData_furigana", JSON.stringify(data));
+  const data = { students: currentStudentOrder, tableData: getCurrentStudentsFromTable(), hidden: Array.from(hiddenSeats) };
+  localStorage.setItem("seatingData_v3", JSON.stringify(data));
   alert("保存しました");
 });
 
 document.getElementById("resetBtn").addEventListener("click", () => {
-  if(confirm("初期化しますか？")) { localStorage.removeItem("seatingData_furigana"); location.reload(); }
+  if(confirm("全てのデータを初期化しますか？")) { localStorage.removeItem("seatingData_v3"); location.reload(); }
 });
 
 document.getElementById("addRowBtn").addEventListener("click", () => createRow(tbody.rows.length+1, "", ""));
@@ -372,7 +361,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const opt = document.createElement("option"); opt.value = i; opt.textContent = i + "回";
     if(i===10) opt.selected = true; sel.appendChild(opt);
   }
-  const saved = localStorage.getItem("seatingData_furigana");
+  const saved = localStorage.getItem("seatingData_v3");
   if(saved) {
     const data = JSON.parse(saved);
     data.tableData.forEach(s => createRow(s.num, s.name, s.kana, s.checked));
@@ -381,8 +370,7 @@ window.addEventListener("DOMContentLoaded", () => {
   } else { 
     for(let i=1; i<=40; i++) createRow(i, "", ""); 
   }
-  renderMiniSeats(); 
-  renderAll();
+  renderMiniSeats(); renderAll();
 });
 </script>
 </body>
