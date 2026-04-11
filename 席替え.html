@@ -2,7 +2,7 @@
 <html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>7×7席替えツール（完全データ維持版）</title>
+<title>7×7席替えツール（ミニ表・状態維持版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
@@ -35,7 +35,6 @@ body {
 
 select, button, input { padding: 8px 12px; font-size: 1em; border-radius: 6px; border: 1px solid #888; }
 
-/* 各種ボタンの色付け */
 #shuffleBtn { background: linear-gradient(180deg, #64b5f6, #1e88e5); color: white; border: none; font-weight: bold; }
 #saveBtn { background: linear-gradient(180deg, #81c784, #388e3c); color: white; border: none; font-weight: bold; }
 #pdfBtn { background: linear-gradient(180deg, #ff8a65, #e64a19); color: white; border: none; font-weight: bold; }
@@ -69,10 +68,20 @@ button:hover { opacity: 0.8; cursor: pointer; }
 textarea { width: 100%; height: 100px; box-sizing: border-box; padding: 8px; resize: none; }
 table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-top: 10px; }
 th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em; }
-#miniSeating { display:flex; flex-direction:column; gap:5px; margin-top:10px; }
-.miniRow { display:flex; justify-content:center; gap:5px; }
-.miniSeat { width:30px; height:20px; border:1px solid #444; cursor:pointer; font-size:0.6em; display:flex; align-items:center; justify-content:center; }
-.miniSeat.selected { background:#a5d6a7; }
+
+/* ミニ座席表のスタイル */
+#miniSeating { 
+  display: flex; flex-direction: column; gap: 4px; 
+  margin: 15px auto; padding: 10px; border: 1px solid #ddd; 
+  border-radius: 8px; background: #fafafa; width: fit-content;
+}
+.miniRow { display: flex; gap: 4px; }
+.miniSeat { 
+  width: 32px; height: 24px; border: 1px solid #444; border-radius: 3px;
+  background: #fff; cursor: pointer; font-size: 0.6em; 
+  display: flex; align-items: center; justify-content: center;
+}
+.miniSeat.selected { background: #a5d6a7 !important; border-color: #2e7d32; }
 
 .status-msg { text-align:center; height:1.2em; font-weight:bold; margin:5px 0; font-size:0.9em; }
 </style>
@@ -84,8 +93,10 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
     <h2>名前入力</h2>
     <textarea id="nameInput" placeholder="田中太郎 たなかたろう&#10;佐藤花子 さとうはなこ"></textarea>
     <button id="addNamesBtn" style="width:100%; margin-top:10px;">名簿を更新</button>
+    
+    <div style="text-align:center; margin-top:15px; font-weight:bold; font-size:0.9em;">【ミニ座席表（空席設定）】</div>
     <div id="miniSeating"></div>
-    <p style="font-size:0.75em; color:#666; margin-top:10px;">ミニ座席の緑色は「空席（固定）」です。</p>
+    <p style="font-size:0.75em; color:#666; text-align:center;">緑色のマスは「常に空席」になります。</p>
   </div>
 
   <div class="container">
@@ -139,15 +150,15 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
 <script>
 const ROWS = 7;
 const COLS = 7;
-const STORAGE_KEY = "seating_system_data_v7";
+const STORAGE_KEY = "seating_system_data_v8";
 const tbody = document.querySelector("#studentTable tbody");
 const areaStudent = document.getElementById("seatingAreaStudent");
 const areaTeacher = document.getElementById("seatingAreaTeacher");
 const statusText = document.getElementById("statusText");
-const hiddenSeats = new Set();
+const hiddenSeats = new Set(); // 空席の座標を保持
 let currentStudentOrder = [];
 
-// --- データの保存・読み込み機能 ---
+// --- データ管理機能 ---
 
 function saveData() {
   syncOrderFromTable();
@@ -159,49 +170,44 @@ function saveData() {
     title: document.getElementById("pdfTitle").innerText
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  showStatus("✅ データを保存しました。更新しても消えません。", "#2e7d32");
+  showStatus("✅ データを保存しました。更新しても維持されます。", "#2e7d32");
 }
 
 function deleteData() {
-  if (confirm("全てのデータを削除して初期化しますか？")) {
+  if (confirm("全てのデータを削除してリセットしますか？")) {
     localStorage.removeItem(STORAGE_KEY);
-    location.reload(); // ページをリロードして初期状態に
+    location.reload();
   }
 }
 
 function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) {
-    // データがない場合は空の行を40行作る
     for(let i=1; i<=40; i++) createRow(i, "", "");
+    renderMiniSeats(); // 初期状態のミニ表表示
+    renderAll();
     return;
   }
 
   const data = JSON.parse(saved);
-  
-  // 1. スライダーとタイトルの復元
   if (data.scale) {
     document.getElementById("scaleSlider").value = data.scale;
     updateScaleUI(data.scale);
   }
   if (data.title) document.getElementById("pdfTitle").innerText = data.title;
-
-  // 2. 名簿テーブルの復元
+  
   tbody.innerHTML = "";
   data.tableData.forEach(s => createRow(s.num, s.name, s.kana, s.checked));
-
-  // 3. 座席順の復元
-  currentStudentOrder = data.students;
-
-  // 4. 空席（隠し席）の復元
+  
+  currentStudentOrder = data.students || [];
   if (data.hidden) data.hidden.forEach(h => hiddenSeats.add(h));
 
   renderMiniSeats();
   renderAll();
-  showStatus("📥 保存されたデータを読み込みました。", "#1976d2");
+  showStatus("📥 以前のデータを読み込みました。", "#1976d2");
 }
 
-// --- 基本システム ---
+// --- システムロジック ---
 
 function updateScaleUI(val) {
   document.getElementById("scaleValue").textContent = Math.round(val * 100) + "%";
@@ -213,7 +219,7 @@ document.getElementById("scaleSlider").addEventListener("input", (e) => updateSc
 function showStatus(msg, color) {
   statusText.textContent = msg;
   statusText.style.color = color;
-  setTimeout(() => { if(statusText.textContent === msg) statusText.textContent = ""; }, 3000);
+  setTimeout(() => { if(statusText.textContent === msg) statusText.textContent = ""; }, 4000);
 }
 
 function createRow(num = "", name = "", kana = "", checked=false) {
@@ -223,10 +229,7 @@ function createRow(num = "", name = "", kana = "", checked=false) {
     <td><span contenteditable="true" style="display:block; text-align:left;">${name}</span></td>
     <td><span contenteditable="true" style="display:block; text-align:left;">${kana}</span></td>
     <td><input type="checkbox" ${checked?"checked":""}></td>`;
-  
-  tr.querySelector("input").addEventListener("change", () => {
-    tr.classList.toggle("checked", tr.querySelector("input").checked);
-  });
+  tr.querySelector("input").addEventListener("change", () => tr.classList.toggle("checked", tr.querySelector("input").checked));
   if(checked) tr.classList.add("checked");
   tbody.appendChild(tr);
 }
@@ -249,8 +252,10 @@ function syncOrderFromTable() {
   });
 }
 
+// ミニ座席表の描画
 function renderMiniSeats() {
-  const mini = document.getElementById("miniSeating"); mini.innerHTML = "";
+  const mini = document.getElementById("miniSeating"); 
+  mini.innerHTML = "";
   for(let r=0; r<ROWS; r++){
     const rowDiv = document.createElement("div"); rowDiv.className = "miniRow";
     for(let c=0; c<COLS; c++) {
@@ -259,7 +264,8 @@ function renderMiniSeats() {
       if(hiddenSeats.has(key)) s.classList.add("selected");
       s.addEventListener("click", () => {
         if(hiddenSeats.has(key)) hiddenSeats.delete(key); else hiddenSeats.add(key);
-        renderMiniSeats(); renderAll();
+        renderMiniSeats(); 
+        renderAll();
       });
       rowDiv.appendChild(s);
     }
@@ -288,6 +294,7 @@ function doShuffleProcess() {
 function renderAll() {
   const seatMap = Array.from({length: ROWS}, () => new Array(COLS).fill(null));
   let sIdx = 0;
+  // 教卓（Row 0）から順に埋めていく
   for(let r=0; r<ROWS; r++) {
     for(let c=0; c<COLS; c++) {
       if(!hiddenSeats.has(`${r}-${c}`) && sIdx < currentStudentOrder.length) {
@@ -307,8 +314,10 @@ function renderView(container, seatMap, isReverse) {
     const rowDiv = document.createElement("div"); rowDiv.className = "row";
     cIdx.forEach(c => {
       const seatEl = document.createElement("div"); seatEl.className = "seat";
-      if(hiddenSeats.has(`${r}-${c}`)) { seatEl.classList.add("hidden-spacer"); }
-      else {
+      if(hiddenSeats.has(`${r}-${c}`)) { 
+        seatEl.classList.add("hidden-spacer");
+        seatEl.innerHTML = "<span style='color:#ccc; font-size:0.7em;'>空席</span>";
+      } else {
         const s = seatMap[r][c];
         if(s) {
           seatEl.innerHTML = `<div style="font-size:0.6em; color:#666; position:absolute; top:2px; left:4px;">${s.num}</div>
@@ -322,7 +331,7 @@ function renderView(container, seatMap, isReverse) {
   });
 }
 
-// --- イベントリスナー ---
+// --- イベント ---
 
 document.getElementById("addNamesBtn").addEventListener("click", () => {
   const lines = document.getElementById("nameInput").value.split("\n").filter(l=>l.trim()!=="");
@@ -343,7 +352,7 @@ document.getElementById("shuffleBtn").addEventListener("click", () => {
     statusText.textContent = `シャッフル中... (${count}/${times})`;
     if(count >= times) { 
       clearInterval(timer); 
-      showStatus("✨ 完了！前方優先で配置しました。", "#e64a19");
+      showStatus("✨ シャッフル完了！チェックありの生徒を前方に配置しました。", "#e64a19");
     }
   }, 80);
 });
@@ -369,7 +378,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const opt = document.createElement("option"); opt.value = i; opt.textContent = i + "回";
     if(i===10) opt.selected = true; sel.appendChild(opt);
   }
-  loadData(); // ページ起動時にデータを読み込む
+  loadData();
 });
 </script>
 </body>
