@@ -2,11 +2,10 @@
 <html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>7×7グリッド 席替えツール（印刷サイズ調整版）</title>
+<title>7×7席替えツール（チェック者＝前方配置版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
-  /* 印刷用の変数（JavaScriptで書き換えます） */
   --print-scale: 1.0;
   --base-seat-w: 130px;
   --base-seat-h: 85px;
@@ -20,7 +19,7 @@ body {
   gap: 20px; padding: 20px; flex-wrap: wrap;
 }
 
-.side-panel { width: 320px; }
+.side-panel { width: 330px; }
 .main-panel { flex: 1; min-width: 800px; }
 
 .container {
@@ -28,7 +27,6 @@ body {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;
 }
 
-/* コントロールパネル */
 .control-panel {
   display: flex; justify-content: center; align-items: center;
   gap: 15px; margin-bottom: 15px; flex-wrap: wrap; background: #f9f9f9; padding: 15px; border-radius: 8px;
@@ -39,7 +37,6 @@ select, button, input { padding: 8px 12px; font-size: 1em; border-radius: 6px; b
 button { background: linear-gradient(180deg, #e0e0e0, #bdbdbd); cursor: pointer; }
 #pdfBtn { background: linear-gradient(180deg, #ff8a65, #e64a19); color: white; border: none; font-weight: bold; }
 
-/* 座席スタイル */
 .teacher { 
   text-align:center; font-weight:bold; padding:10px; 
   border:2px solid #333; background:#e1f0ff; 
@@ -55,7 +52,6 @@ button { background: linear-gradient(180deg, #e0e0e0, #bdbdbd); cursor: pointer;
 .seat.fixed { background:#d6f5ff !important; -webkit-print-color-adjust: exact; }
 .seat.hidden-spacer { border:1px dashed #ccc; background:rgba(0,0,0,0.02); }
 
-/* PDF用（教職員用）の拡大適用エリア */
 #teacherPdfArea {
   width: fit-content; margin: 0 auto; padding: 20px; background: white;
 }
@@ -66,9 +62,8 @@ button { background: linear-gradient(180deg, #e0e0e0, #bdbdbd); cursor: pointer;
 }
 #teacherPdfArea .row { gap: calc(10px * var(--print-scale)); margin-bottom: calc(10px * var(--print-scale)); }
 #teacherPdfArea .view-label { font-size: calc(1.5em * var(--print-scale)); }
-#teacherPdfArea rt { font-size: 0.6em; }
+#teacherPdfArea rt { font-size: 0.65em; }
 
-/* その他 */
 textarea { width: 100%; height: 100px; box-sizing: border-box; padding: 8px; resize: none; }
 table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-top: 10px; }
 th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em; }
@@ -86,17 +81,23 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
     <textarea id="nameInput" placeholder="田中太郎 たなかたろう&#10;佐藤花子 さとうはなこ"></textarea>
     <button id="addNamesBtn" style="width:100%; margin-top:10px;">名簿を更新</button>
     <div id="miniSeating"></div>
+    <p style="font-size:0.8em; color:#666; margin-top:10px;">ミニ座席の緑色は「空席」です。</p>
   </div>
 
   <div class="container">
     <h3>出席番号管理</h3>
     <table id="studentTable">
       <thead>
-        <tr><th style="width:30px;">番</th><th>氏名</th><th>ふりがな</th><th style="width:35px;">固定</th></tr>
+        <tr><th style="width:30px;">番</th><th>氏名</th><th>ふりがな</th><th style="width:35px;">前方</th></tr>
       </thead>
       <tbody></tbody>
     </table>
     <button id="addRowBtn" style="width:100%; margin-top:10px;">＋ 行を追加</button>
+    <p style="font-size:0.75em; color:blue; margin-top:8px;">
+      <b>【仕様説明】</b><br>
+      ・「前方」にチェックを入れた生徒は、教卓に近い席に優先配置されます。<br>
+      ・チェック者同士、未チェック者同士の中でランダムに入れ替わります。
+    </p>
   </div>
 </div>
 
@@ -122,7 +123,7 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
   </div>
 
   <div class="container">
-    <div style="text-align:center; color:#1976d2; font-weight:bold; margin-bottom:5px;">【学生用表示】</div>
+    <div style="text-align:center; color:#1976d2; font-weight:bold; margin-bottom:5px;">【学生用表示】（教卓が上）</div>
     <div class="teacher">教卓</div>
     <div id="seatingAreaStudent"></div>
   </div>
@@ -145,7 +146,7 @@ const areaTeacher = document.getElementById("seatingAreaTeacher");
 const hiddenSeats = new Set();
 let currentStudentOrder = [];
 
-// --- サイズ調整機能 ---
+// サイズ調整
 const scaleSlider = document.getElementById("scaleSlider");
 const scaleValue = document.getElementById("scaleValue");
 scaleSlider.addEventListener("input", (e) => {
@@ -154,7 +155,7 @@ scaleSlider.addEventListener("input", (e) => {
   document.documentElement.style.setProperty('--print-scale', val);
 });
 
-/* テーブル管理 */
+/* テーブル行作成 */
 function createRow(num = "", name = "", kana = "", checked=false) {
   const tr = document.createElement("tr");
   tr.innerHTML = `
@@ -206,22 +207,39 @@ function renderMiniSeats() {
   }
 }
 
+/** 
+ * シャッフルロジック（チェック有りを前方へ）
+ */
 function doShuffleProcess() {
   const allStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
-  const fixedOnes = allStudents.filter(s => s.checked);
-  const flexOnes = allStudents.filter(s => !s.checked);
-  for(let i=flexOnes.length-1; i>0; i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [flexOnes[i], flexOnes[j]] = [flexOnes[j], flexOnes[i]];
-  }
-  currentStudentOrder = [...fixedOnes, ...flexOnes];
+  
+  // 1. チェック有無で分離
+  const checkedStudents = allStudents.filter(s => s.checked);
+  const uncheckedStudents = allStudents.filter(s => !s.checked);
+
+  // 2. それぞれのグループ内をシャッフル
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  };
+  shuffleArray(checkedStudents);
+  shuffleArray(uncheckedStudents);
+
+  // 3. チェックありを先頭（＝前方席）にした配列を新しく作成
+  currentStudentOrder = [...checkedStudents, ...uncheckedStudents];
+  
   renderAll();
 }
 
 function renderAll() {
   if(currentStudentOrder.length === 0) currentStudentOrder = getCurrentStudentsFromTable().filter(s => s.name !== "");
+  
   const seatMap = Array.from({length: ROWS}, () => new Array(COLS).fill(null));
   let sIdx = 0;
+  // Row 0 から Row 6 に向かって順に埋めていく
+  // Row 0 が教卓に最も近い（学生用表示の最上段）
   for(let r=0; r<ROWS; r++) {
     for(let c=0; c<COLS; c++) {
       if(!hiddenSeats.has(`${r}-${c}`) && sIdx < currentStudentOrder.length) {
@@ -272,8 +290,12 @@ document.getElementById("shuffleBtn").addEventListener("click", () => {
   let count = 0; const status = document.getElementById("statusText");
   const timer = setInterval(() => {
     doShuffleProcess(); count++;
-    status.textContent = `席替え中... (${count}/${times})`;
-    if(count >= times) { clearInterval(timer); status.textContent = "完了！"; setTimeout(()=>status.textContent="",2000); }
+    status.textContent = `シャッフル中... (${count}/${times})`;
+    if(count >= times) { 
+      clearInterval(timer); 
+      status.textContent = "完了！チェック付きを前方に配置しました。"; 
+      setTimeout(()=>status.textContent="", 3000); 
+    }
   }, 80);
 });
 
@@ -291,12 +313,12 @@ document.getElementById("pdfBtn").addEventListener("click", () => {
 document.getElementById("saveBtn").addEventListener("click", () => {
   syncOrderFromTable();
   const data = { scale: scaleSlider.value, students: currentStudentOrder, tableData: getCurrentStudentsFromTable(), hidden: Array.from(hiddenSeats) };
-  localStorage.setItem("seatingData_v4", JSON.stringify(data));
+  localStorage.setItem("seatingData_v6", JSON.stringify(data));
   alert("保存しました");
 });
 
 document.getElementById("resetBtn").addEventListener("click", () => {
-  if(confirm("リセットしますか？")) { localStorage.removeItem("seatingData_v4"); location.reload(); }
+  if(confirm("全てのデータを初期化しますか？")) { localStorage.removeItem("seatingData_v6"); location.reload(); }
 });
 
 document.getElementById("addRowBtn").addEventListener("click", () => createRow(tbody.rows.length+1, "", ""));
@@ -307,7 +329,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const opt = document.createElement("option"); opt.value = i; opt.textContent = i + "回";
     if(i===10) opt.selected = true; sel.appendChild(opt);
   }
-  const saved = localStorage.getItem("seatingData_v4");
+  const saved = localStorage.getItem("seatingData_v6");
   if(saved) {
     const data = JSON.parse(saved);
     if(data.scale) {
