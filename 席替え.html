@@ -2,7 +2,7 @@
 <html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>7×7席替えツール（ミニ表・状態維持版）</title>
+<title>7×7席替えツール（完全保存版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
@@ -69,7 +69,6 @@ textarea { width: 100%; height: 100px; box-sizing: border-box; padding: 8px; res
 table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-top: 10px; }
 th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em; }
 
-/* ミニ座席表のスタイル */
 #miniSeating { 
   display: flex; flex-direction: column; gap: 4px; 
   margin: 15px auto; padding: 10px; border: 1px solid #ddd; 
@@ -150,64 +149,87 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
 <script>
 const ROWS = 7;
 const COLS = 7;
-const STORAGE_KEY = "seating_system_data_v8";
+const STORAGE_KEY = "seating_final_save_v9";
 const tbody = document.querySelector("#studentTable tbody");
 const areaStudent = document.getElementById("seatingAreaStudent");
 const areaTeacher = document.getElementById("seatingAreaTeacher");
 const statusText = document.getElementById("statusText");
-const hiddenSeats = new Set(); // 空席の座標を保持
+const hiddenSeats = new Set();
 let currentStudentOrder = [];
 
-// --- データ管理機能 ---
+// --- 保存機能の強化 ---
 
 function saveData() {
-  syncOrderFromTable();
+  // 現在のテーブル入力を読み取る
+  const tableData = getCurrentStudentsFromTable();
+  
+  // もしまだ一度もシャッフルしていないなら、テーブルの並び順をそのまま保存
+  if (currentStudentOrder.length === 0) {
+    currentStudentOrder = tableData.filter(s => s.name !== "");
+  } else {
+    // すでにシャッフル済みなら、テーブルの最新の名前やチェック状態を既存の並び順に反映
+    currentStudentOrder.forEach(s => {
+      const match = tableData.find(t => t.num === s.num);
+      if(match) { s.name = match.name; s.kana = match.kana; s.checked = match.checked; }
+    });
+  }
+
   const data = {
     students: currentStudentOrder,
-    tableData: getCurrentStudentsFromTable(),
+    tableData: tableData,
     hidden: Array.from(hiddenSeats),
     scale: document.getElementById("scaleSlider").value,
     title: document.getElementById("pdfTitle").innerText
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  showStatus("✅ データを保存しました。更新しても維持されます。", "#2e7d32");
-}
 
-function deleteData() {
-  if (confirm("全てのデータを削除してリセットしますか？")) {
-    localStorage.removeItem(STORAGE_KEY);
-    location.reload();
-  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  showStatus("✅ データを保存しました。ページを閉じても大丈夫です。", "#2e7d32");
 }
 
 function loadData() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) {
     for(let i=1; i<=40; i++) createRow(i, "", "");
-    renderMiniSeats(); // 初期状態のミニ表表示
+    renderMiniSeats();
     renderAll();
     return;
   }
 
   const data = JSON.parse(saved);
+  
+  // スケールとタイトルの復元
   if (data.scale) {
     document.getElementById("scaleSlider").value = data.scale;
     updateScaleUI(data.scale);
   }
   if (data.title) document.getElementById("pdfTitle").innerText = data.title;
-  
+
+  // 名簿テーブルの復元
   tbody.innerHTML = "";
-  data.tableData.forEach(s => createRow(s.num, s.name, s.kana, s.checked));
-  
+  if (data.tableData) {
+    data.tableData.forEach(s => createRow(s.num, s.name, s.kana, s.checked));
+  }
+
+  // 空席と並び順の復元
   currentStudentOrder = data.students || [];
-  if (data.hidden) data.hidden.forEach(h => hiddenSeats.add(h));
+  if (data.hidden) {
+    hiddenSeats.clear();
+    data.hidden.forEach(h => hiddenSeats.add(h));
+  }
 
   renderMiniSeats();
   renderAll();
-  showStatus("📥 以前のデータを読み込みました。", "#1976d2");
+  showStatus("📥 保存されたデータを読み込みました。", "#1976d2");
 }
 
-// --- システムロジック ---
+function deleteData() {
+  if (confirm("全てのデータを削除して初期化しますか？")) {
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+}
+
+// --- 基本システム ---
 
 function updateScaleUI(val) {
   document.getElementById("scaleValue").textContent = Math.round(val * 100) + "%";
@@ -229,8 +251,10 @@ function createRow(num = "", name = "", kana = "", checked=false) {
     <td><span contenteditable="true" style="display:block; text-align:left;">${name}</span></td>
     <td><span contenteditable="true" style="display:block; text-align:left;">${kana}</span></td>
     <td><input type="checkbox" ${checked?"checked":""}></td>`;
-  tr.querySelector("input").addEventListener("change", () => tr.classList.toggle("checked", tr.querySelector("input").checked));
   if(checked) tr.classList.add("checked");
+  tr.querySelector("input").addEventListener("change", (e) => {
+    tr.classList.toggle("checked", e.target.checked);
+  });
   tbody.appendChild(tr);
 }
 
@@ -239,23 +263,13 @@ function getCurrentStudentsFromTable(){
   tbody.querySelectorAll("tr").forEach(tr=>{
     const spans = tr.querySelectorAll("span");
     const checked = tr.querySelector("input").checked;
-    arr.push({num: spans[0].textContent.trim(), name: spans[1].textContent.trim(), kana: spans[2].textContent.trim(), checked});
+    arr.push({num: spans[0].textContent.trim(), name: spans[1].textContent.trim(), kana: spans[2].textContent.trim(), checked: checked});
   });
   return arr;
 }
 
-function syncOrderFromTable() {
-  const tableData = getCurrentStudentsFromTable();
-  currentStudentOrder.forEach(s => {
-    const match = tableData.find(t => t.num === s.num);
-    if(match) { s.name = match.name; s.kana = match.kana; s.checked = match.checked; }
-  });
-}
-
-// ミニ座席表の描画
 function renderMiniSeats() {
-  const mini = document.getElementById("miniSeating"); 
-  mini.innerHTML = "";
+  const mini = document.getElementById("miniSeating"); mini.innerHTML = "";
   for(let r=0; r<ROWS; r++){
     const rowDiv = document.createElement("div"); rowDiv.className = "miniRow";
     for(let c=0; c<COLS; c++) {
@@ -274,9 +288,9 @@ function renderMiniSeats() {
 }
 
 function doShuffleProcess() {
-  const allStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
-  const checkedStudents = allStudents.filter(s => s.checked);
-  const uncheckedStudents = allStudents.filter(s => !s.checked);
+  const tableStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
+  const checkedStudents = tableStudents.filter(s => s.checked);
+  const uncheckedStudents = tableStudents.filter(s => !s.checked);
 
   const shuffle = (arr) => {
     for (let i = arr.length - 1; i > 0; i--) {
@@ -292,9 +306,13 @@ function doShuffleProcess() {
 }
 
 function renderAll() {
+  // 並び順がない場合はテーブルから作成
+  if (currentStudentOrder.length === 0) {
+    currentStudentOrder = getCurrentStudentsFromTable().filter(s => s.name !== "");
+  }
+
   const seatMap = Array.from({length: ROWS}, () => new Array(COLS).fill(null));
   let sIdx = 0;
-  // 教卓（Row 0）から順に埋めていく
   for(let r=0; r<ROWS; r++) {
     for(let c=0; c<COLS; c++) {
       if(!hiddenSeats.has(`${r}-${c}`) && sIdx < currentStudentOrder.length) {
@@ -331,7 +349,7 @@ function renderView(container, seatMap, isReverse) {
   });
 }
 
-// --- イベント ---
+// --- イベント登録 ---
 
 document.getElementById("addNamesBtn").addEventListener("click", () => {
   const lines = document.getElementById("nameInput").value.split("\n").filter(l=>l.trim()!=="");
@@ -352,7 +370,7 @@ document.getElementById("shuffleBtn").addEventListener("click", () => {
     statusText.textContent = `シャッフル中... (${count}/${times})`;
     if(count >= times) { 
       clearInterval(timer); 
-      showStatus("✨ シャッフル完了！チェックありの生徒を前方に配置しました。", "#e64a19");
+      showStatus("✨ 完了！チェックありを前方に配置しました。", "#e64a19");
     }
   }, 80);
 });
