@@ -2,7 +2,7 @@
 <html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>7×7席替えツール（縦並び・完全保存版）</title>
+<title>7×7席替えツール（前方優先・縦並び版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
@@ -107,7 +107,11 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
       <tbody></tbody>
     </table>
     <button id="addRowBtn" style="width:100%; margin-top:10px;">＋ 行を追加</button>
-    <p style="font-size:0.7em; color:#d32f2f; margin-top:5px;">※番号順に「縦」に並びます。</p>
+    <p style="font-size:0.75em; color:blue; margin-top:8px;">
+      <b>配置のルール:</b><br>
+      ① チェック有りの人は最前列から優先的に埋まります。<br>
+      ② 残りの人は縦方向に並びます。
+    </p>
   </div>
 </div>
 
@@ -150,7 +154,7 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
 <script>
 const ROWS = 7;
 const COLS = 7;
-const STORAGE_KEY = "seating_vertical_v10";
+const STORAGE_KEY = "seating_final_fixed_v11";
 const tbody = document.querySelector("#studentTable tbody");
 const areaStudent = document.getElementById("seatingAreaStudent");
 const areaTeacher = document.getElementById("seatingAreaTeacher");
@@ -158,18 +162,10 @@ const statusText = document.getElementById("statusText");
 const hiddenSeats = new Set();
 let currentStudentOrder = [];
 
-// --- 保存・読み込み ---
+// --- データ保存・読込 ---
 
 function saveData() {
   const tableData = getCurrentStudentsFromTable();
-  if (currentStudentOrder.length === 0) {
-    currentStudentOrder = tableData.filter(s => s.name !== "");
-  } else {
-    currentStudentOrder.forEach(s => {
-      const match = tableData.find(t => t.num === s.num);
-      if(match) { s.name = match.name; s.kana = match.kana; s.checked = match.checked; }
-    });
-  }
   const data = {
     students: currentStudentOrder,
     tableData: tableData,
@@ -178,7 +174,7 @@ function saveData() {
     title: document.getElementById("pdfTitle").innerText
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  showStatus("✅ データを保存しました。", "#2e7d32");
+  showStatus("✅ 保存しました。更新しても維持されます。", "#2e7d32");
 }
 
 function loadData() {
@@ -198,23 +194,21 @@ function loadData() {
   currentStudentOrder = data.students || [];
   if (data.hidden) { hiddenSeats.clear(); data.hidden.forEach(h => hiddenSeats.add(h)); }
   renderMiniSeats(); renderAll();
-  showStatus("📥 保存されたデータを読み込みました。", "#1976d2");
 }
 
 function deleteData() {
-  if (confirm("全てのデータをリセットしますか？")) {
+  if (confirm("全てのデータを削除してリセットしますか？")) {
     localStorage.removeItem(STORAGE_KEY);
     location.reload();
   }
 }
 
-// --- ロジック ---
+// --- システム ---
 
 function updateScaleUI(val) {
   document.getElementById("scaleValue").textContent = Math.round(val * 100) + "%";
   document.documentElement.style.setProperty('--print-scale', val);
 }
-
 document.getElementById("scaleSlider").addEventListener("input", (e) => updateScaleUI(e.target.value));
 
 function showStatus(msg, color) {
@@ -266,36 +260,67 @@ function doShuffleProcess() {
   const tableStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
   const checkedStudents = tableStudents.filter(s => s.checked);
   const uncheckedStudents = tableStudents.filter(s => !s.checked);
+  
   const shuffle = (arr) => {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
   };
-  shuffle(checkedStudents); shuffle(uncheckedStudents);
+  shuffle(checkedStudents);
+  shuffle(uncheckedStudents);
+
   currentStudentOrder = [...checkedStudents, ...uncheckedStudents];
   renderAll();
 }
 
 /**
- * 座席表の描画（ここが縦並びの肝）
+ * 重要: 前方優先 + 縦並び の描画ロジック
  */
 function renderAll() {
   if (currentStudentOrder.length === 0) {
     currentStudentOrder = getCurrentStudentsFromTable().filter(s => s.name !== "");
   }
+
   const seatMap = Array.from({length: ROWS}, () => new Array(COLS).fill(null));
-  let sIdx = 0;
-  
-  // 縦方向に埋めるロジック: 列(c)を先に回し、その中で行(r)を回す
-  for(let c=0; c<COLS; c++) {
-    for(let r=0; r<ROWS; r++) {
-      if(!hiddenSeats.has(`${r}-${c}`) && sIdx < currentStudentOrder.length) {
-        seatMap[r][c] = currentStudentOrder[sIdx];
-        sIdx++;
+
+  // 1. 利用可能な全座席リストを作成
+  const availableSeats = [];
+  for(let r=0; r<ROWS; r++) {
+    for(let c=0; c<COLS; c++) {
+      if(!hiddenSeats.has(`${r}-${c}`)) {
+        availableSeats.push({r, c});
       }
     }
   }
+
+  // 2. チェック有り（前方優先）と無し（縦並び）で座席を分ける
+  const checkedCount = currentStudentOrder.filter(s => s.checked).length;
+  
+  // チェック有りの人のための座席：行(Row)が小さい順 ＝ 教卓に近い順
+  // 列(Col)の順序は左から右へ
+  const frontSeats = [...availableSeats].sort((a, b) => a.r - b.r || a.c - b.c);
+  
+  // 残りの座席：縦(Col)が小さい順に並べる
+  const remainingSeatPool = frontSeats.slice(checkedCount);
+  const verticalRemainingSeats = [...remainingSeatPool].sort((a, b) => a.c - b.c || a.r - b.r);
+
+  // 3. マッピング
+  // 前方優先の人
+  for(let i=0; i < checkedCount; i++) {
+    if(frontSeats[i]) {
+      const s = frontSeats[i];
+      seatMap[s.r][s.c] = currentStudentOrder[i];
+    }
+  }
+  // その他の人（縦方向）
+  for(let i=0; i < (currentStudentOrder.length - checkedCount); i++) {
+    if(verticalRemainingSeats[i]) {
+      const s = verticalRemainingSeats[i];
+      seatMap[s.r][s.c] = currentStudentOrder[checkedCount + i];
+    }
+  }
+
   renderView(areaStudent, seatMap, false);
   renderView(areaTeacher, seatMap, true);
 }
@@ -343,9 +368,9 @@ document.getElementById("shuffleBtn").addEventListener("click", () => {
   let count = 0;
   const timer = setInterval(() => {
     doShuffleProcess(); count++;
-    statusText.textContent = `シャッフル中... (${count}/${times})`;
+    statusText.textContent = `入れ替え中... (${count}/${times})`;
     if(count >= times) { 
-      clearInterval(timer); showStatus("✨ 完了！前方から縦方向に配置しました。", "#e64a19");
+      clearInterval(timer); showStatus("✨ 完了！チェック者を前方に配置しました。", "#e64a19");
     }
   }, 80);
 });
