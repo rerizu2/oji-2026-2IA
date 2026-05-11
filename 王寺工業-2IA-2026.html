@@ -312,6 +312,7 @@
         newsTitle: "📢 おしらせ！",
         detailsText: "詳細はこちら",
         newsList: [
+          { date: "2026/05/11", text: "テスト範囲、日を追加！"},
           { date: "2026/04/09", text: "委員・係のメニューを追加！"},
           { date: "2026/03/19", text: "新ホームページ追加機能！", url: "https://rerizu2.github.io/oji-2026-2IA/新機能.html"},
           { date: "2026/03/19", text: "2IAホームページを開放！" }
@@ -362,6 +363,7 @@
         newsTitle: "📢 News",
         detailsText: "Details here",
         newsList: [
+          { date: "2026/05/11", text: "Added more dates to the test scope!"},
           { date: "2026/04/09", text: "Added menu for committees and staff!"},
           { date: "2026/03/19", text: "New homepage features!", url: "https://rerizu2.github.io/oji-2026-2IA/新機能.html"},
           { date: "2026/03/19", text: "2IA homepage is now open!" }
@@ -412,6 +414,7 @@
         newsTitle: "📢 공지사항",
         detailsText: "자세한 내용은 여기로",
         newsList: [
+          { date: "2026/05/11", text: "테스트 범위, 일 추가!"},
           { date: "2026/04/09", text: "위원·계 메뉴 추가!"},
           { date: "2026/03/19", text: "새로운 홈페이지 추가 기능!", url: "https://rerizu2.github.io/oji-2026-2IA/新機能.html"},
           { date: "2026/03/19", text: "2IA 홈페이지를 개방!" }
@@ -543,7 +546,14 @@
                 <div class="card"><h2>${t.submitSystem}</h2><a href="https://script.google.com/macros/s/AKfycbyPmoHYeSGFKXwrroChnk04Scgjw5TezaQe78at3gdQXZlXUO8LVCkxOKDpp7398aYV/exec" target="_blank" style="display:block; text-align:center; margin-top:10px; color:var(--primary-dark); font-weight:bold;">${t.submitSystem}</a></div>
                 <div class="card"><h2>${t.aiTitle}</h2><iframe src="https://udify.app/chatbot/92D920kUwjWcHbHb" style="height: 700px" frameborder="0"></iframe></div>`;
       } else if (page === 'test') {
-        html = `<h1>${t.testTitle}</h1><div class="card"><p style="text-align:center;">${t.testP}</p></div>`;
+        // --- テストページ ---
+        html = `<h1>${t.testTitle}</h1>
+                <div class="card">
+                  <p style="text-align:center; margin-bottom:15px;">${t.testP}</p>
+                  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRE3WB1xgKs3cxvjvuwiTDk5uPFO2bMzNCiQQbMaOfI5m9hWmkxZVn8qmideHJYVr8-_iGbB2KxgAzv/pubhtml?gid=2109316949&amp;single=true&amp;widget=true&amp;headers=false" height="600"></iframe>
+                  <div style="margin-top:30px;"></div>
+                  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRE3WB1xgKs3cxvjvuwiTDk5uPFO2bMzNCiQQbMaOfI5m9hWmkxZVn8qmideHJYVr8-_iGbB2KxgAzv/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false" height="1200"></iframe>
+                </div>`;
       } else if (page === 'haihubutu') {
         html = `<h1>${t.printTitle}</h1><div class="card"><iframe src="https://drive.google.com/embeddedfolderview?id=1uDqKuYJx3aQ4avxmkW9A7JTlDQXMYhNB#grid" style="height:450px;"></iframe></div>`;
       }
