@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Drive 画像アップロード</title>
+  <title>カメラ → Google Drive</title>
 
   <style>
 
@@ -27,63 +27,43 @@
       width:100%;
       max-width:500px;
       background:white;
-      padding:30px;
+      padding:25px;
       border-radius:20px;
       box-shadow:0 10px 30px rgba(0,0,0,0.1);
     }
 
     h1{
       text-align:center;
-      margin-bottom:25px;
+      margin-bottom:20px;
       color:#333;
     }
 
-    .upload-area{
-      border:2px dashed #4285f4;
-      border-radius:15px;
-      padding:40px 20px;
-      text-align:center;
-      cursor:pointer;
-      transition:0.3s;
-      background:#fafafa;
-    }
-
-    .upload-area:hover{
-      background:#eef4ff;
-    }
-
-    .upload-area.drag{
-      background:#dbe8ff;
-      border-color:#1a73e8;
-    }
-
-    .upload-area p{
-      color:#666;
-      margin-top:10px;
-    }
-
-    input[type=file]{
-      display:none;
-    }
-
-    #preview{
-      margin-top:20px;
+    video,
+    canvas,
+    img{
       width:100%;
       border-radius:15px;
+      background:black;
+    }
+
+    canvas{
       display:none;
     }
 
-    .file-name{
+    img{
+      display:none;
       margin-top:15px;
-      text-align:center;
-      color:#555;
-      word-break:break-all;
+    }
+
+    .buttons{
+      display:flex;
+      gap:10px;
+      margin-top:15px;
     }
 
     button{
-      width:100%;
-      margin-top:20px;
-      padding:15px;
+      flex:1;
+      padding:14px;
       border:none;
       border-radius:12px;
       background:#4285f4;
@@ -102,33 +82,14 @@
       cursor:not-allowed;
     }
 
-    .progress-box{
-      margin-top:20px;
-      display:none;
-    }
-
-    .progress-bar{
-      width:100%;
-      height:20px;
-      background:#ddd;
-      border-radius:999px;
-      overflow:hidden;
-    }
-
-    .progress{
-      width:0%;
-      height:100%;
-      background:#4285f4;
-      transition:0.2s;
-    }
-
     .status{
-      margin-top:15px;
+      margin-top:20px;
       text-align:center;
       color:#333;
+      word-break:break-all;
     }
 
-    .success-link{
+    .link{
       display:inline-block;
       margin-top:10px;
       color:#1a73e8;
@@ -141,30 +102,31 @@
 
   <div class="card">
 
-    <h1>Google Drive アップロード</h1>
+    <h1>📸 カメラアップロード</h1>
 
-    <label class="upload-area" id="uploadArea">
+    <video id="video" autoplay playsinline></video>
 
-      <h2>📁 画像を選択</h2>
-      <p>クリック または ドラッグ&ドロップ</p>
-
-      <input type="file" id="fileInput" accept="image/*">
-
-    </label>
+    <canvas id="canvas"></canvas>
 
     <img id="preview">
 
-    <div class="file-name" id="fileName"></div>
+    <div class="buttons">
 
-    <button id="uploadBtn" disabled>
-      アップロード
-    </button>
+      <button id="startBtn">
+        カメラ開始
+      </button>
 
-    <div class="progress-box" id="progressBox">
+      <button id="captureBtn" disabled>
+        撮影
+      </button>
 
-      <div class="progress-bar">
-        <div class="progress" id="progress"></div>
-      </div>
+    </div>
+
+    <div class="buttons">
+
+      <button id="uploadBtn" disabled>
+        Google Driveへ保存
+      </button>
 
     </div>
 
@@ -174,178 +136,160 @@
 
   <script>
 
-    // ===============================
-    // Apps Script URLを入れる
-    // ===============================
+    // ====================================
+    // Apps Script URL
+    // ====================================
 
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWnNkqVEUoUImxmA4i-s4peqPI9BNxHzvB_j0GzPEMQQFSAi0rMWRnRdfh0r4IDJ-X9w/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyyhsPFnyl-wwAG78RvhRnITXvH2Nue7KCaNXcgOK5tpqzM54daP7aOk0vHfu6dhFoeg/exec";
 
-    // ===============================
-    // 要素取得
-    // ===============================
+    // ====================================
+    // 要素
+    // ====================================
 
-    const uploadArea = document.getElementById("uploadArea");
-    const fileInput = document.getElementById("fileInput");
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
     const preview = document.getElementById("preview");
-    const fileName = document.getElementById("fileName");
+
+    const startBtn = document.getElementById("startBtn");
+    const captureBtn = document.getElementById("captureBtn");
     const uploadBtn = document.getElementById("uploadBtn");
-    const progress = document.getElementById("progress");
-    const progressBox = document.getElementById("progressBox");
+
     const status = document.getElementById("status");
 
-    let selectedFile = null;
+    let imageData = null;
 
-    // ===============================
-    // ファイル選択
-    // ===============================
+    // ====================================
+    // カメラ開始
+    // ====================================
 
-    uploadArea.addEventListener("click", () => {
-      fileInput.click();
-    });
+    startBtn.addEventListener("click", async () => {
 
-    fileInput.addEventListener("change", (e) => {
-      handleFile(e.target.files[0]);
-    });
+      try{
 
-    // ===============================
-    // ドラッグ&ドロップ
-    // ===============================
+        const stream = await navigator.mediaDevices.getUserMedia({
 
-    uploadArea.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      uploadArea.classList.add("drag");
-    });
+          video:{
+            facingMode:"environment"
+          },
+          audio:false
 
-    uploadArea.addEventListener("dragleave", () => {
-      uploadArea.classList.remove("drag");
-    });
+        });
 
-    uploadArea.addEventListener("drop", (e) => {
+        video.srcObject = stream;
 
-      e.preventDefault();
+        captureBtn.disabled = false;
 
-      uploadArea.classList.remove("drag");
+        status.innerHTML = "✅ カメラ起動";
 
-      const file = e.dataTransfer.files[0];
+      }catch(error){
 
-      handleFile(file);
+        status.innerHTML = `
+          ❌ カメラ使用不可<br>
+          ${error}
+        `;
 
-    });
-
-    // ===============================
-    // ファイル処理
-    // ===============================
-
-    function handleFile(file){
-
-      if(!file) return;
-
-      if(!file.type.startsWith("image/")){
-        alert("画像ファイルを選択してください");
-        return;
       }
 
-      selectedFile = file;
+    });
 
-      fileName.textContent = file.name;
+    // ====================================
+    // 撮影
+    // ====================================
+
+    captureBtn.addEventListener("click", () => {
+
+      const context = canvas.getContext("2d");
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      context.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      imageData = canvas.toDataURL("image/jpeg", 0.9);
+
+      preview.src = imageData;
+      preview.style.display = "block";
 
       uploadBtn.disabled = false;
 
-      const reader = new FileReader();
+      status.innerHTML = "📷 撮影完了";
 
-      reader.onload = (e) => {
+    });
 
-        preview.src = e.target.result;
-        preview.style.display = "block";
-
-      };
-
-      reader.readAsDataURL(file);
-
-    }
-
-    // ===============================
-    // アップロード
-    // ===============================
+    // ====================================
+    // Google Driveへ保存
+    // ====================================
 
     uploadBtn.addEventListener("click", async () => {
 
-      if(!selectedFile) return;
+      if(!imageData) return;
+
+      status.innerHTML = "⬆ アップロード中...";
 
       uploadBtn.disabled = true;
 
-      status.textContent = "アップロード中...";
+      try{
 
-      progressBox.style.display = "block";
-
-      progress.style.width = "10%";
-
-      const reader = new FileReader();
-
-      reader.onload = async () => {
-
-        progress.style.width = "40%";
-
-        const base64 = reader.result.split(",")[1];
+        const base64 = imageData.split(",")[1];
 
         const data = {
 
-          name: selectedFile.name,
-          type: selectedFile.type,
+          name: "camera_" + Date.now() + ".jpg",
+          type: "image/jpeg",
           file: base64
 
         };
 
-        try{
+        const response = await fetch(SCRIPT_URL, {
 
-          progress.style.width = "70%";
+          method:"POST",
+          body:JSON.stringify(data)
 
-          const response = await fetch(SCRIPT_URL, {
+        });
 
-            method:"POST",
-            body:JSON.stringify(data)
+        const result = await response.json();
 
-          });
-
-          const result = await response.json();
-
-          progress.style.width = "100%";
-
-          if(result.success){
-
-            status.innerHTML = `
-              <div>
-                ✅ アップロード成功
-              </div>
-
-              <a class="success-link" href="${result.url}" target="_blank">
-                Google Driveで見る
-              </a>
-            `;
-
-          }else{
-
-            status.innerHTML = `
-              ❌ エラー<br>
-              ${result.error}
-            `;
-
-          }
-
-        }catch(error){
+        if(result.success){
 
           status.innerHTML = `
-            ❌ 通信エラー<br>
-            ${error}
+
+            ✅ 保存成功<br>
+
+            <a class="link"
+               href="${result.url}"
+               target="_blank">
+
+              Google Driveで開く
+
+            </a>
+
+          `;
+
+        }else{
+
+          status.innerHTML = `
+            ❌ エラー<br>
+            ${result.error}
           `;
 
         }
 
-        uploadBtn.disabled = false;
+      }catch(error){
 
-      };
+        status.innerHTML = `
+          ❌ 通信エラー<br>
+          ${error}
+        `;
 
-      reader.readAsDataURL(selectedFile);
+      }
+
+      uploadBtn.disabled = false;
 
     });
 
