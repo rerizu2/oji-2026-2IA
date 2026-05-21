@@ -323,6 +323,7 @@ html,body{
   aspect-ratio:1;
   overflow:hidden;
   background:#111;
+  cursor: pointer;
 }
 
 .gallery-item img,
@@ -346,6 +347,51 @@ html,body{
   border-radius:10px;
 
   font-size:12px;
+}
+
+/* =========================
+   FULL SCREEN MODAL (追加)
+========================= */
+
+#fullScreenModal {
+  position: fixed;
+  inset: 0;
+  background: black;
+  z-index: 1000000;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#fullScreenContent {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#fullScreenContent img,
+#fullScreenContent video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+#closeFullScreen {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 20px);
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  font-size: 20px;
+  z-index: 1000001;
+  cursor: pointer;
 }
 
 </style>
@@ -461,6 +507,15 @@ class="active">
 
 </div>
 
+<!-- ===================== -->
+<!-- FULL SCREEN MODAL (追加) -->
+<!-- ===================== -->
+
+<div id="fullScreenModal">
+  <button id="closeFullScreen">✕</button>
+  <div id="fullScreenContent"></div>
+</div>
+
 <script>
 
 /* =========================================
@@ -512,6 +567,10 @@ document.getElementById("galleryGrid");
 
 const closeGallery =
 document.getElementById("closeGallery");
+
+const fullScreenModal = document.getElementById("fullScreenModal");
+const fullScreenContent = document.getElementById("fullScreenContent");
+const closeFullScreen = document.getElementById("closeFullScreen");
 
 /* =========================================
    STATE
@@ -744,11 +803,8 @@ ctx.restore();
    ギャラリー表示
 ===================== */
 
-lastMedia.src =
-canvas.toDataURL(
-"image/jpeg",
-0.7
-);
+const dataURL = canvas.toDataURL("image/jpeg", 0.7);
+lastMedia.src = dataURL;
 
 /* =====================
    一覧追加
@@ -758,7 +814,7 @@ mediaList.unshift({
 
 type:"image",
 
-src:lastMedia.src
+src:dataURL
 
 });
 
@@ -1160,7 +1216,7 @@ dist;
 );
 
 /* =========================================
-   GALLERY RENDER
+   GALLERY RENDER (全画面機能を追加)
 ========================================= */
 
 function renderGallery(){
@@ -1174,6 +1230,9 @@ document.createElement("div");
 
 item.className =
 "gallery-item";
+
+// クリックしたら全画面で表示
+item.onclick = () => openFullScreen(media);
 
 if(media.type === "image"){
 
@@ -1206,6 +1265,37 @@ galleryGrid.appendChild(item);
 });
 
 }
+
+/* =========================================
+   FULL SCREEN LOGIC (新規追加)
+========================================= */
+
+function openFullScreen(media) {
+  fullScreenContent.innerHTML = "";
+  
+  if (media.type === "image") {
+    const img = document.createElement("img");
+    img.src = media.src;
+    fullScreenContent.appendChild(img);
+  } else {
+    const vid = document.createElement("video");
+    vid.src = media.src;
+    vid.controls = true;
+    vid.autoplay = true;
+    vid.playsinline = true;
+    fullScreenContent.appendChild(vid);
+  }
+  
+  fullScreenModal.style.display = "flex";
+}
+
+closeFullScreen.onclick = () => {
+  // 動画が再生中なら停止させる
+  const vid = fullScreenContent.querySelector("video");
+  if(vid) vid.pause();
+  
+  fullScreenModal.style.display = "none";
+};
 
 /* =========================================
    STATUS
