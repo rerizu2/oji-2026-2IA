@@ -312,8 +312,7 @@ html,body{
   flex:1;
   overflow-y:auto;
   display:grid;
-  grid-template-columns:
-  repeat(3,1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap:4px;
   padding:4px;
 }
@@ -323,7 +322,7 @@ html,body{
   aspect-ratio:1;
   overflow:hidden;
   background:#111;
-  cursor: pointer;
+  cursor:pointer;
 }
 
 .gallery-item img,
@@ -331,40 +330,34 @@ html,body{
   width:100%;
   height:100%;
   object-fit:cover;
+  pointer-events: none; /* 親のdivでクリックを拾うため */
 }
 
 .video-icon{
   position:absolute;
   bottom:5px;
   right:5px;
-
   background:rgba(0,0,0,0.7);
-
   color:white;
-
   padding:2px 6px;
-
   border-radius:10px;
-
   font-size:12px;
 }
 
 /* =========================
-   FULL SCREEN MODAL (追加)
+   FULLSCREEN (新規修正)
 ========================= */
-
-#fullScreenModal {
+#fullscreenOverlay {
   position: fixed;
   inset: 0;
   background: black;
-  z-index: 1000000;
+  z-index: 200000; /* ギャラリーより上に表示 */
   display: none;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-#fullScreenContent {
+#fullscreenContent {
   width: 100%;
   height: 100%;
   display: flex;
@@ -372,25 +365,26 @@ html,body{
   align-items: center;
 }
 
-#fullScreenContent img,
-#fullScreenContent video {
+#fullscreenContent img,
+#fullscreenContent video {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
 }
 
-#closeFullScreen {
+#closeFullscreen {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 20px);
   right: 20px;
-  width: 44px;
-  height: 44px;
-  background: rgba(0,0,0,0.5);
+  width: 50px;
+  height: 50px;
+  background: rgba(255,255,255,0.2);
+  border: none;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.3);
   color: white;
-  font-size: 20px;
-  z-index: 1000001;
+  font-size: 24px;
+  backdrop-filter: blur(10px);
+  z-index: 200001;
   cursor: pointer;
 }
 
@@ -398,122 +392,49 @@ html,body{
 </head>
 <body>
 
-<!-- ===================== -->
 <!-- TOP -->
-<!-- ===================== -->
-
 <div class="top-bar">
-
-<button class="icon-btn"
-onclick="flipCamera()">
-🔄
-</button>
-
-<div id="timer">
-00:00
+<button class="icon-btn" onclick="flipCamera()">🔄</button>
+<div id="timer">00:00</div>
+<div id="clock">00:00:00</div>
 </div>
-
-<div id="clock">
-00:00:00
-</div>
-
-</div>
-
-<!-- ===================== -->
-<!-- STATUS -->
-<!-- ===================== -->
 
 <div id="status"></div>
 
-<!-- ===================== -->
 <!-- VIDEO -->
-<!-- ===================== -->
+<video id="video" autoplay playsinline muted></video>
 
-<video id="video"
-autoplay
-playsinline
-muted>
-</video>
-
-<!-- ===================== -->
 <!-- ZOOM -->
-<!-- ===================== -->
-
 <div class="zoom-wrap">
-
-<div id="zoomText">
-1.0 x
+<div id="zoomText">1.0 x</div>
+<input type="range" id="zoomSlider" min="1" max="10" step="0.1" value="1">
 </div>
 
-<input type="range"
-id="zoomSlider"
-min="1"
-max="10"
-step="0.1"
-value="1">
-
-</div>
-
-<!-- ===================== -->
 <!-- BOTTOM -->
-<!-- ===================== -->
-
 <div class="bottom">
-
 <div class="mode">
-
-<button id="photoBtn"
-class="active">
-写真
-</button>
-
-<button id="videoBtn">
-ビデオ
-</button>
-
+<button id="photoBtn" class="active">写真</button>
+<button id="videoBtn">ビデオ</button>
 </div>
-
 <div class="bottom-row">
-
-<div id="galleryPreview">
-
-<img id="lastMedia">
-
-</div>
-
+<div id="galleryPreview"><img id="lastMedia"></div>
 <button id="shutter"></button>
-
+</div>
 </div>
 
-</div>
-
-<!-- ===================== -->
 <!-- GALLERY MODAL -->
-<!-- ===================== -->
-
 <div id="galleryModal">
-
 <div id="galleryHeader">
-
 <div>ギャラリー</div>
-
-<button id="closeGallery">
-✕
-</button>
-
+<button id="closeGallery">✕</button>
 </div>
-
 <div id="galleryGrid"></div>
-
 </div>
 
-<!-- ===================== -->
-<!-- FULL SCREEN MODAL (追加) -->
-<!-- ===================== -->
-
-<div id="fullScreenModal">
-  <button id="closeFullScreen">✕</button>
-  <div id="fullScreenContent"></div>
+<!-- FULLSCREEN OVERLAY (追加) -->
+<div id="fullscreenOverlay">
+  <button id="closeFullscreen">✕</button>
+  <div id="fullscreenContent"></div>
 </div>
 
 <script>
@@ -521,808 +442,248 @@ class="active">
 /* =========================================
    Apps Script URL
 ========================================= */
-
-const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbyFoU9QJjqtWdlHDXG51qV-Y-hG1DUhUEF_GwPlvPJs85HZcDOmG_PeoNnJoQ1Sdeyu9g/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFoU9QJjqtWdlHDXG51qV-Y-hG1DUhUEF_GwPlvPJs85HZcDOmG_PeoNnJoQ1Sdeyu9g/exec";
 
 /* =========================================
-   ELEMENT
+   ELEMENTS
 ========================================= */
+const video = document.getElementById("video");
+const shutter = document.getElementById("shutter");
+const timer = document.getElementById("timer");
+const statusBox = document.getElementById("status");
+const zoomSlider = document.getElementById("zoomSlider");
+const zoomText = document.getElementById("zoomText");
+const photoBtn = document.getElementById("photoBtn");
+const videoBtn = document.getElementById("videoBtn");
+const lastMedia = document.getElementById("lastMedia");
+const galleryPreview = document.getElementById("galleryPreview");
+const galleryModal = document.getElementById("galleryModal");
+const galleryGrid = document.getElementById("galleryGrid");
+const closeGallery = document.getElementById("closeGallery");
 
-const video =
-document.getElementById("video");
-
-const shutter =
-document.getElementById("shutter");
-
-const timer =
-document.getElementById("timer");
-
-const statusBox =
-document.getElementById("status");
-
-const zoomSlider =
-document.getElementById("zoomSlider");
-
-const zoomText =
-document.getElementById("zoomText");
-
-const photoBtn =
-document.getElementById("photoBtn");
-
-const videoBtn =
-document.getElementById("videoBtn");
-
-const lastMedia =
-document.getElementById("lastMedia");
-
-const galleryPreview =
-document.getElementById("galleryPreview");
-
-const galleryModal =
-document.getElementById("galleryModal");
-
-const galleryGrid =
-document.getElementById("galleryGrid");
-
-const closeGallery =
-document.getElementById("closeGallery");
-
-const fullScreenModal = document.getElementById("fullScreenModal");
-const fullScreenContent = document.getElementById("fullScreenContent");
-const closeFullScreen = document.getElementById("closeFullScreen");
-
-/* =========================================
-   STATE
-========================================= */
+// 追加分
+const fullscreenOverlay = document.getElementById("fullscreenOverlay");
+const fullscreenContent = document.getElementById("fullscreenContent");
+const closeFullscreen = document.getElementById("closeFullscreen");
 
 let currentMode = "photo";
-
 let currentStream = null;
-
 let facingMode = "environment";
-
 let mediaRecorder;
-
 let isRecording = false;
-
 let recordStart;
-
 let timerInterval;
-
 let initialPinchDistance = null;
-
 let mediaList = [];
 
 /* =========================================
    CLOCK
 ========================================= */
-
 setInterval(() => {
-
-document.getElementById("clock")
-.innerText =
-new Date()
-.toLocaleTimeString(
-"ja-JP",
-{hour12:false}
-);
-
+document.getElementById("clock").innerText = new Date().toLocaleTimeString("ja-JP",{hour12:false});
 },1000);
 
 /* =========================================
    START CAMERA
 ========================================= */
-
 startCamera();
-
 async function startCamera(){
-
-if(currentStream){
-
-currentStream
-.getTracks()
-.forEach(track => track.stop());
-
-}
-
+if(currentStream){ currentStream.getTracks().forEach(track => track.stop()); }
 try{
-
-currentStream =
-await navigator
-.mediaDevices
-.getUserMedia({
-
-video:{
-facingMode:facingMode,
-width:{ideal:1920},
-height:{ideal:1080}
-},
-
+currentStream = await navigator.mediaDevices.getUserMedia({
+video:{facingMode:facingMode, width:{ideal:1920}, height:{ideal:1080}},
 audio:true
-
 });
-
-video.srcObject =
-currentStream;
-
-}catch(error){
-
-showStatus(
-"カメラ起動エラー"
-);
-
+video.srcObject = currentStream;
+}catch(error){ showStatus("カメラ起動エラー"); }
 }
-
-}
-
-/* =========================================
-   FLIP CAMERA
-========================================= */
 
 function flipCamera(){
-
 if(isRecording) return;
-
-facingMode =
-facingMode === "environment"
-? "user"
-: "environment";
-
+facingMode = (facingMode === "environment") ? "user" : "environment";
 startCamera();
-
 }
 
 /* =========================================
-   MODE
+   MODE SWITCH
 ========================================= */
-
 photoBtn.onclick = () => {
-
 if(isRecording) return;
-
 currentMode = "photo";
-
 photoBtn.classList.add("active");
-
 videoBtn.classList.remove("active");
-
 shutter.classList.remove("video");
-
 };
-
 videoBtn.onclick = () => {
-
 if(isRecording) return;
-
 currentMode = "video";
-
 videoBtn.classList.add("active");
-
 photoBtn.classList.remove("active");
-
 shutter.classList.add("video");
-
 };
 
 /* =========================================
-   GALLERY OPEN
+   GALLERY OPEN/CLOSE
 ========================================= */
-
-galleryPreview.onclick = () => {
-
-galleryModal.style.display =
-"flex";
-
-};
-
-closeGallery.onclick = () => {
-
-galleryModal.style.display =
-"none";
-
-};
+galleryPreview.onclick = () => { galleryModal.style.display = "flex"; };
+closeGallery.onclick = () => { galleryModal.style.display = "none"; };
 
 /* =========================================
    SHUTTER
 ========================================= */
-
 shutter.onclick = () => {
-
-if(currentMode === "photo"){
-
-takePhoto();
-
-}else{
-
-toggleRecording();
-
-}
-
+if(currentMode === "photo") takePhoto();
+else toggleRecording();
 };
 
 /* =========================================
-   PHOTO
+   PHOTO LOGIC
 ========================================= */
-
 async function takePhoto(){
-
 document.body.style.opacity = "0.7";
+setTimeout(() => { document.body.style.opacity = "1"; },100);
+if(navigator.vibrate) navigator.vibrate(100);
 
-setTimeout(() => {
-document.body.style.opacity = "1";
-},100);
-
-if(navigator.vibrate){
-navigator.vibrate(100);
-}
-
-showStatus("📸 撮影中...");
-
-const canvas =
-document.createElement("canvas");
-
-canvas.width =
-video.videoWidth;
-
-canvas.height =
-video.videoHeight;
-
-const ctx =
-canvas.getContext("2d");
-
-const zoom =
-parseFloat(
-zoomSlider.value
-);
-
+const canvas = document.createElement("canvas");
+canvas.width = video.videoWidth;
+canvas.height = video.videoHeight;
+const ctx = canvas.getContext("2d");
+const zoom = parseFloat(zoomSlider.value);
 ctx.save();
-
-ctx.translate(
-canvas.width / 2,
-canvas.height / 2
-);
-
+ctx.translate(canvas.width / 2, canvas.height / 2);
 ctx.scale(zoom, zoom);
-
-ctx.drawImage(
-
-video,
-
--canvas.width / 2,
--canvas.height / 2,
-
-canvas.width,
-canvas.height
-
-);
-
+ctx.drawImage(video, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
 ctx.restore();
-
-/* =====================
-   ギャラリー表示
-===================== */
 
 const dataURL = canvas.toDataURL("image/jpeg", 0.7);
 lastMedia.src = dataURL;
-
-/* =====================
-   一覧追加
-===================== */
-
-mediaList.unshift({
-
-type:"image",
-
-src:dataURL
-
-});
-
+mediaList.unshift({ type:"image", src:dataURL });
 renderGallery();
 
-/* =====================
-   Base64
-===================== */
-
-const base64 =
-canvas
-.toDataURL(
-"image/jpeg",
-0.92
-)
-.split(",")[1];
-
-/* =====================
-   Upload
-===================== */
-
-const data = {
-
-name:
-"IMG_" +
-Date.now() +
-".jpg",
-
-type:"image/jpeg",
-
-file:base64
-
-};
-
+const base64 = dataURL.split(",")[1];
+const data = { name: "IMG_" + Date.now() + ".jpg", type:"image/jpeg", file:base64 };
 try{
-
-showStatus(
-"⬆ Google Drive保存中..."
-);
-
-const response =
-await fetch(
-SCRIPT_URL,
-{
-
-method:"POST",
-
-body:JSON.stringify(data)
-
-}
-);
-
-const result =
-await response.json();
-
-if(result.success){
-
-showStatus(
-"✅ 自動保存完了"
-);
-
-}else{
-
-showStatus(
-"❌ 保存失敗"
-);
-
-}
-
-}catch(error){
-
-showStatus(
-"❌ 通信エラー"
-);
-
-}
-
+showStatus("⬆ 保存中...");
+const response = await fetch(SCRIPT_URL, { method:"POST", body:JSON.stringify(data) });
+const result = await response.json();
+if(result.success) showStatus("✅ 保存完了");
+}catch(e){ showStatus("❌ 通信エラー"); }
 }
 
 /* =========================================
-   VIDEO
+   VIDEO LOGIC
 ========================================= */
-
-function toggleRecording(){
-
-if(!isRecording){
-
-startRecording();
-
-}else{
-
-stopRecording();
-
-}
-
-}
+function toggleRecording(){ if(!isRecording) startRecording(); else stopRecording(); }
 
 function startRecording(){
-
 const chunks = [];
-
-mediaRecorder =
-new MediaRecorder(
-currentStream
-);
-
-mediaRecorder.ondataavailable =
-e => {
-
-if(e.data.size > 0){
-
-chunks.push(e.data);
-
-}
-
-};
-
-mediaRecorder.onstop =
-async () => {
-
-const blob =
-new Blob(
-chunks,
-{
-type:"video/webm"
-}
-);
-
-/* =====================
-   ギャラリー更新
-===================== */
-
-const videoURL =
-URL.createObjectURL(blob);
-
-lastMedia.src =
-videoURL;
-
-/* =====================
-   一覧追加
-===================== */
-
-mediaList.unshift({
-
-type:"video",
-
-src:videoURL
-
-});
-
+mediaRecorder = new MediaRecorder(currentStream);
+mediaRecorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+mediaRecorder.onstop = async () => {
+const blob = new Blob(chunks, {type:"video/webm"});
+const videoURL = URL.createObjectURL(blob);
+lastMedia.src = videoURL;
+mediaList.unshift({ type:"video", src:videoURL });
 renderGallery();
 
-const reader =
-new FileReader();
-
-reader.onloadend =
-async () => {
-
-const base64 =
-reader.result
-.split(",")[1];
-
-const data = {
-
-name:
-"VID_" +
-Date.now() +
-".webm",
-
-type:"video/webm",
-
-file:base64
-
+const reader = new FileReader();
+reader.onloadend = async () => {
+const base64 = reader.result.split(",")[1];
+const data = { name: "VID_" + Date.now() + ".webm", type:"video/webm", file:base64 };
+try{ await fetch(SCRIPT_URL, { method:"POST", body:JSON.stringify(data) }); showStatus("✅ 動画保存完了"); } catch(e){}
 };
-
-try{
-
-await fetch(
-SCRIPT_URL,
-{
-
-method:"POST",
-
-body:JSON.stringify(data)
-
-}
-);
-
-showStatus(
-"✅ 動画保存完了"
-);
-
-}catch(error){
-
-showStatus(
-"❌ 動画保存失敗"
-);
-
-}
-
-};
-
 reader.readAsDataURL(blob);
-
 };
-
 mediaRecorder.start();
-
 isRecording = true;
-
-recordStart =
-Date.now();
-
-shutter.classList.add(
-"recording"
-);
-
-timer.style.display =
-"block";
-
-timerInterval =
-setInterval(
-updateTimer,
-1000
-);
-
-showStatus(
-"🎥 録画開始"
-);
-
+recordStart = Date.now();
+shutter.classList.add("recording");
+timer.style.display = "block";
+timerInterval = setInterval(updateTimer, 1000);
+showStatus("🎥 録画中");
 }
 
 function stopRecording(){
-
 mediaRecorder.stop();
-
 isRecording = false;
-
-shutter.classList.remove(
-"recording"
-);
-
-timer.style.display =
-"none";
-
-clearInterval(
-timerInterval
-);
-
-showStatus(
-"🎥 録画終了"
-);
-
+shutter.classList.remove("recording");
+timer.style.display = "none";
+clearInterval(timerInterval);
 }
 
 function updateTimer(){
-
-const sec =
-Math.floor(
-(
-Date.now() -
-recordStart
-) / 1000
-);
-
-const m =
-String(
-Math.floor(sec / 60)
-).padStart(2,"0");
-
-const s =
-String(
-sec % 60
-).padStart(2,"0");
-
-timer.innerText =
-`${m}:${s}`;
-
+const sec = Math.floor((Date.now() - recordStart) / 1000);
+const m = String(Math.floor(sec/60)).padStart(2,"0");
+const s = String(sec%60).padStart(2,"0");
+timer.innerText = `${m}:${s}`;
 }
 
 /* =========================================
-   ZOOM
+   GALLERY RENDER (クリックイベントを確実に付与)
 ========================================= */
-
-zoomSlider.oninput = () => {
-
-applyZoom(
-zoomSlider.value
-);
-
-};
-
-function applyZoom(v){
-
-const value =
-parseFloat(v)
-.toFixed(1);
-
-video.style.transform =
-`scale(${value})`;
-
-zoomText.innerText =
-value + " x";
-
-}
-
-zoomText.onclick = () => {
-
-zoomSlider.value = 1;
-
-applyZoom(1);
-
-};
-
-/* =========================================
-   PINCH ZOOM
-========================================= */
-
-window.addEventListener(
-
-"touchstart",
-
-e => {
-
-if(e.touches.length === 2){
-
-initialPinchDistance =
-Math.hypot(
-
-e.touches[0].pageX -
-e.touches[1].pageX,
-
-e.touches[0].pageY -
-e.touches[1].pageY
-
-);
-
-}
-
-},
-
-{passive:false}
-
-);
-
-window.addEventListener(
-
-"touchmove",
-
-e => {
-
-if(
-e.touches.length === 2 &&
-initialPinchDistance
-){
-
-const dist =
-Math.hypot(
-
-e.touches[0].pageX -
-e.touches[1].pageX,
-
-e.touches[0].pageY -
-e.touches[1].pageY
-
-);
-
-let value =
-parseFloat(
-zoomSlider.value
-);
-
-value +=
-(
-dist -
-initialPinchDistance
-) / 150;
-
-value =
-Math.max(
-1,
-Math.min(10,value)
-);
-
-zoomSlider.value =
-value;
-
-applyZoom(value);
-
-initialPinchDistance =
-dist;
-
-}
-
-},
-
-{passive:false}
-
-);
-
-/* =========================================
-   GALLERY RENDER (全画面機能を追加)
-========================================= */
-
 function renderGallery(){
+  galleryGrid.innerHTML = "";
+  mediaList.forEach(media => {
+    const item = document.createElement("div");
+    item.className = "gallery-item";
+    
+    if(media.type === "image"){
+      item.innerHTML = `<img src="${media.src}">`;
+    }else{
+      item.innerHTML = `<video src="${media.src}" muted playsinline></video><div class="video-icon">▶</div>`;
+    }
 
-galleryGrid.innerHTML = "";
+    // クリックイベント
+    item.addEventListener('click', () => {
+      openFullscreen(media);
+    });
 
-mediaList.forEach(media => {
-
-const item =
-document.createElement("div");
-
-item.className =
-"gallery-item";
-
-// クリックしたら全画面で表示
-item.onclick = () => openFullScreen(media);
-
-if(media.type === "image"){
-
-item.innerHTML = `
-
-<img src="${media.src}">
-
-`;
-
-}else{
-
-item.innerHTML = `
-
-<video
-src="${media.src}"
-muted
-playsinline>
-</video>
-
-<div class="video-icon">
-▶
-</div>
-
-`;
-
-}
-
-galleryGrid.appendChild(item);
-
-});
-
+    galleryGrid.appendChild(item);
+  });
 }
 
 /* =========================================
-   FULL SCREEN LOGIC (新規追加)
+   FULLSCREEN LOGIC (修正)
 ========================================= */
-
-function openFullScreen(media) {
-  fullScreenContent.innerHTML = "";
+function openFullscreen(media) {
+  fullscreenContent.innerHTML = "";
   
-  if (media.type === "image") {
+  if(media.type === "image") {
     const img = document.createElement("img");
     img.src = media.src;
-    fullScreenContent.appendChild(img);
+    fullscreenContent.appendChild(img);
   } else {
     const vid = document.createElement("video");
     vid.src = media.src;
     vid.controls = true;
     vid.autoplay = true;
     vid.playsinline = true;
-    fullScreenContent.appendChild(vid);
+    fullscreenContent.appendChild(vid);
   }
   
-  fullScreenModal.style.display = "flex";
+  fullscreenOverlay.style.display = "flex";
 }
 
-closeFullScreen.onclick = () => {
-  // 動画が再生中なら停止させる
-  const vid = fullScreenContent.querySelector("video");
-  if(vid) vid.pause();
-  
-  fullScreenModal.style.display = "none";
+closeFullscreen.onclick = () => {
+  fullscreenOverlay.style.display = "none";
+  fullscreenContent.innerHTML = ""; 
 };
 
 /* =========================================
-   STATUS
+   ZOOM & STATUS
 ========================================= */
-
-function showStatus(msg){
-
-statusBox.innerText =
-msg;
-
-statusBox.style.display =
-"block";
-
-clearTimeout(
-statusBox.timer
-);
-
-statusBox.timer =
-setTimeout(() => {
-
-statusBox.style.display =
-"none";
-
-},3000);
-
+zoomSlider.oninput = () => { applyZoom(zoomSlider.value); };
+function applyZoom(v){
+  const value = parseFloat(v).toFixed(1);
+  video.style.transform = `scale(${value})`;
+  zoomText.innerText = value + " x";
 }
-
+function showStatus(msg){
+  statusBox.innerText = msg;
+  statusBox.style.display = "block";
+  clearTimeout(statusBox.timer);
+  statusBox.timer = setTimeout(() => { statusBox.style.display = "none"; }, 3000);
+}
 </script>
 </body>
 </html>
