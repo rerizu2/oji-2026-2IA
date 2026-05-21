@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Drive 画像アップロード</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:sans-serif;
+      background:#f0f2f5;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+
+    .card{
+      width:100%;
+      max-width:500px;
+      background:white;
+      padding:30px;
+      border-radius:20px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:25px;
+      color:#333;
+    }
+
+    .upload-area{
+      border:2px dashed #4285f4;
+      border-radius:15px;
+      padding:40px 20px;
+      text-align:center;
+      cursor:pointer;
+      transition:0.3s;
+      background:#fafafa;
+    }
+
+    .upload-area:hover{
+      background:#eef4ff;
+    }
+
+    .upload-area.drag{
+      background:#dbe8ff;
+      border-color:#1a73e8;
+    }
+
+    .upload-area p{
+      color:#666;
+      margin-top:10px;
+    }
+
+    input[type=file]{
+      display:none;
+    }
+
+    #preview{
+      margin-top:20px;
+      width:100%;
+      border-radius:15px;
+      display:none;
+    }
+
+    .file-name{
+      margin-top:15px;
+      text-align:center;
+      color:#555;
+      word-break:break-all;
+    }
+
+    button{
+      width:100%;
+      margin-top:20px;
+      padding:15px;
+      border:none;
+      border-radius:12px;
+      background:#4285f4;
+      color:white;
+      font-size:16px;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    button:hover{
+      background:#1a73e8;
+    }
+
+    button:disabled{
+      background:#999;
+      cursor:not-allowed;
+    }
+
+    .progress-box{
+      margin-top:20px;
+      display:none;
+    }
+
+    .progress-bar{
+      width:100%;
+      height:20px;
+      background:#ddd;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .progress{
+      width:0%;
+      height:100%;
+      background:#4285f4;
+      transition:0.2s;
+    }
+
+    .status{
+      margin-top:15px;
+      text-align:center;
+      color:#333;
+    }
+
+    .success-link{
+      display:inline-block;
+      margin-top:10px;
+      color:#1a73e8;
+      text-decoration:none;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <h1>Google Drive アップロード</h1>
+
+    <label class="upload-area" id="uploadArea">
+
+      <h2>📁 画像を選択</h2>
+      <p>クリック または ドラッグ&ドロップ</p>
+
+      <input type="file" id="fileInput" accept="image/*">
+
+    </label>
+
+    <img id="preview">
+
+    <div class="file-name" id="fileName"></div>
+
+    <button id="uploadBtn" disabled>
+      アップロード
+    </button>
+
+    <div class="progress-box" id="progressBox">
+
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+
+    </div>
+
+    <div class="status" id="status"></div>
+
+  </div>
+
+  <script>
+
+    // ===============================
+    // Apps Script URLを入れる
+    // ===============================
+
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWnNkqVEUoUImxmA4i-s4peqPI9BNxHzvB_j0GzPEMQQFSAi0rMWRnRdfh0r4IDJ-X9w/exec";
+
+    // ===============================
+    // 要素取得
+    // ===============================
+
+    const uploadArea = document.getElementById("uploadArea");
+    const fileInput = document.getElementById("fileInput");
+    const preview = document.getElementById("preview");
+    const fileName = document.getElementById("fileName");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const progress = document.getElementById("progress");
+    const progressBox = document.getElementById("progressBox");
+    const status = document.getElementById("status");
+
+    let selectedFile = null;
+
+    // ===============================
+    // ファイル選択
+    // ===============================
+
+    uploadArea.addEventListener("click", () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      handleFile(e.target.files[0]);
+    });
+
+    // ===============================
+    // ドラッグ&ドロップ
+    // ===============================
+
+    uploadArea.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      uploadArea.classList.add("drag");
+    });
+
+    uploadArea.addEventListener("dragleave", () => {
+      uploadArea.classList.remove("drag");
+    });
+
+    uploadArea.addEventListener("drop", (e) => {
+
+      e.preventDefault();
+
+      uploadArea.classList.remove("drag");
+
+      const file = e.dataTransfer.files[0];
+
+      handleFile(file);
+
+    });
+
+    // ===============================
+    // ファイル処理
+    // ===============================
+
+    function handleFile(file){
+
+      if(!file) return;
+
+      if(!file.type.startsWith("image/")){
+        alert("画像ファイルを選択してください");
+        return;
+      }
+
+      selectedFile = file;
+
+      fileName.textContent = file.name;
+
+      uploadBtn.disabled = false;
+
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+
+        preview.src = e.target.result;
+        preview.style.display = "block";
+
+      };
+
+      reader.readAsDataURL(file);
+
+    }
+
+    // ===============================
+    // アップロード
+    // ===============================
+
+    uploadBtn.addEventListener("click", async () => {
+
+      if(!selectedFile) return;
+
+      uploadBtn.disabled = true;
+
+      status.textContent = "アップロード中...";
+
+      progressBox.style.display = "block";
+
+      progress.style.width = "10%";
+
+      const reader = new FileReader();
+
+      reader.onload = async () => {
+
+        progress.style.width = "40%";
+
+        const base64 = reader.result.split(",")[1];
+
+        const data = {
+
+          name: selectedFile.name,
+          type: selectedFile.type,
+          file: base64
+
+        };
+
+        try{
+
+          progress.style.width = "70%";
+
+          const response = await fetch(SCRIPT_URL, {
+
+            method:"POST",
+            body:JSON.stringify(data)
+
+          });
+
+          const result = await response.json();
+
+          progress.style.width = "100%";
+
+          if(result.success){
+
+            status.innerHTML = `
+              <div>
+                ✅ アップロード成功
+              </div>
+
+              <a class="success-link" href="${result.url}" target="_blank">
+                Google Driveで見る
+              </a>
+            `;
+
+          }else{
+
+            status.innerHTML = `
+              ❌ エラー<br>
+              ${result.error}
+            `;
+
+          }
+
+        }catch(error){
+
+          status.innerHTML = `
+            ❌ 通信エラー<br>
+            ${error}
+          `;
+
+        }
+
+        uploadBtn.disabled = false;
+
+      };
+
+      reader.readAsDataURL(selectedFile);
+
+    });
+
+  </script>
+
+</body>
+</html>
