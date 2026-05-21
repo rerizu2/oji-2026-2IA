@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-      content="
-      width=device-width,
-      initial-scale=1.0,
-      maximum-scale=1.0,
-      user-scalable=no">
+content="
+width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
 
 <title>Drive Camera</title>
 
@@ -49,46 +49,34 @@ html,body{
 ========================= */
 
 .top-bar{
-
   position:fixed;
-
   top:0;
   left:0;
-
   width:100%;
-
   z-index:20;
 
   display:flex;
-
   justify-content:space-between;
   align-items:center;
 
   padding:
-    calc(env(safe-area-inset-top) + 15px)
-    20px
-    0;
+  calc(env(safe-area-inset-top) + 15px)
+  20px
+  0;
 }
 
 #clock,
 #timer{
-
   color:white;
-
   font-size:16px;
   font-weight:bold;
-
   text-shadow:0 0 10px black;
 }
 
 #timer{
-
   background:red;
-
   padding:6px 14px;
-
   border-radius:999px;
-
   display:none;
 }
 
@@ -97,22 +85,14 @@ html,body{
 ========================= */
 
 .icon-btn{
-
   width:50px;
   height:50px;
-
   border:none;
-
   border-radius:50%;
-
   background:rgba(255,255,255,0.15);
-
   color:white;
-
   font-size:24px;
-
   backdrop-filter:blur(10px);
-
   cursor:pointer;
 }
 
@@ -121,26 +101,16 @@ html,body{
 ========================= */
 
 #status{
-
   position:fixed;
-
   top:120px;
   left:50%;
-
   transform:translateX(-50%);
-
   background:rgba(0,0,0,0.8);
-
   color:white;
-
   padding:12px 20px;
-
   border-radius:20px;
-
   z-index:999;
-
   font-size:14px;
-
   display:none;
 }
 
@@ -149,39 +119,26 @@ html,body{
 ========================= */
 
 .zoom-wrap{
-
   position:fixed;
-
   bottom:180px;
-
   width:100%;
-
   z-index:20;
 
   display:flex;
-
   flex-direction:column;
-
   align-items:center;
-
   gap:10px;
 }
 
 #zoomText{
-
   background:rgba(0,0,0,0.5);
-
   color:#ffdb00;
-
   padding:6px 16px;
-
   border-radius:999px;
-
   font-weight:bold;
 }
 
 #zoomSlider{
-
   width:70%;
   max-width:300px;
 }
@@ -191,51 +148,37 @@ html,body{
 ========================= */
 
 .bottom{
-
   position:fixed;
-
   bottom:0;
   left:0;
-
   width:100%;
-
   z-index:20;
 
   display:flex;
-
   flex-direction:column;
-
   align-items:center;
-
   gap:20px;
 
   padding-bottom:
-    calc(env(safe-area-inset-bottom) + 20px);
+  calc(env(safe-area-inset-bottom) + 20px);
 
   background:
-    linear-gradient(
-      transparent,
-      rgba(0,0,0,0.7)
-    );
+  linear-gradient(
+  transparent,
+  rgba(0,0,0,0.7)
+  );
 }
 
 .mode{
-
   display:flex;
-
   gap:40px;
 }
 
 .mode button{
-
   background:none;
-
   border:none;
-
   color:rgba(255,255,255,0.5);
-
   font-size:16px;
-
   font-weight:bold;
 }
 
@@ -248,33 +191,25 @@ html,body{
 ========================= */
 
 .bottom-row{
-
   width:100%;
-
   display:flex;
-
   justify-content:center;
-
   align-items:center;
-
   position:relative;
 }
 
 /* =========================
-   GALLERY
+   GALLERY PREVIEW
 ========================= */
 
 #galleryPreview{
-
   position:absolute;
-
   right:30px;
 
   width:60px;
   height:60px;
 
   border-radius:15px;
-
   overflow:hidden;
 
   background:rgba(255,255,255,0.1);
@@ -284,16 +219,13 @@ html,body{
   backdrop-filter:blur(10px);
 
   display:flex;
-
   justify-content:center;
   align-items:center;
 }
 
 #lastMedia{
-
   width:100%;
   height:100%;
-
   object-fit:cover;
 }
 
@@ -302,20 +234,13 @@ html,body{
 ========================= */
 
 #shutter{
-
   width:85px;
   height:85px;
-
   border-radius:50%;
-
   border:6px solid white;
-
   background:white;
-
   margin-bottom:20px;
-
   position:relative;
-
   cursor:pointer;
 }
 
@@ -324,31 +249,103 @@ html,body{
 }
 
 #shutter.video::after{
-
   content:"";
-
   position:absolute;
-
   width:48px;
   height:48px;
-
   background:red;
-
   border-radius:50%;
-
   top:12px;
   left:12px;
 }
 
 #shutter.recording::after{
-
   width:28px;
   height:28px;
-
   border-radius:8px;
-
   top:22px;
   left:22px;
+}
+
+/* =========================
+   GALLERY MODAL
+========================= */
+
+#galleryModal{
+  position:fixed;
+  inset:0;
+  background:black;
+  z-index:99999;
+  display:none;
+  flex-direction:column;
+}
+
+#galleryHeader{
+  height:70px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  padding:
+  calc(env(safe-area-inset-top) + 10px)
+  20px
+  10px;
+
+  color:white;
+  font-size:20px;
+  font-weight:bold;
+
+  background:rgba(0,0,0,0.9);
+}
+
+#closeGallery{
+  width:40px;
+  height:40px;
+  border:none;
+  border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  color:white;
+  font-size:20px;
+}
+
+#galleryGrid{
+  flex:1;
+  overflow-y:auto;
+  display:grid;
+  grid-template-columns:
+  repeat(3,1fr);
+  gap:4px;
+  padding:4px;
+}
+
+.gallery-item{
+  position:relative;
+  aspect-ratio:1;
+  overflow:hidden;
+  background:#111;
+}
+
+.gallery-item img,
+.gallery-item video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.video-icon{
+  position:absolute;
+  bottom:5px;
+  right:5px;
+
+  background:rgba(0,0,0,0.7);
+
+  color:white;
+
+  padding:2px 6px;
+
+  border-radius:10px;
+
+  font-size:12px;
 }
 
 </style>
@@ -361,18 +358,18 @@ html,body{
 
 <div class="top-bar">
 
-  <button class="icon-btn"
-          onclick="flipCamera()">
-    🔄
-  </button>
+<button class="icon-btn"
+onclick="flipCamera()">
+🔄
+</button>
 
-  <div id="timer">
-    00:00
-  </div>
+<div id="timer">
+00:00
+</div>
 
-  <div id="clock">
-    00:00:00
-  </div>
+<div id="clock">
+00:00:00
+</div>
 
 </div>
 
@@ -387,9 +384,9 @@ html,body{
 <!-- ===================== -->
 
 <video id="video"
-       autoplay
-       playsinline
-       muted>
+autoplay
+playsinline
+muted>
 </video>
 
 <!-- ===================== -->
@@ -398,16 +395,16 @@ html,body{
 
 <div class="zoom-wrap">
 
-  <div id="zoomText">
-    1.0 x
-  </div>
+<div id="zoomText">
+1.0 x
+</div>
 
-  <input type="range"
-         id="zoomSlider"
-         min="1"
-         max="10"
-         step="0.1"
-         value="1">
+<input type="range"
+id="zoomSlider"
+min="1"
+max="10"
+step="0.1"
+value="1">
 
 </div>
 
@@ -417,30 +414,50 @@ html,body{
 
 <div class="bottom">
 
-  <div class="mode">
+<div class="mode">
 
-    <button id="photoBtn"
-            class="active">
-      写真
-    </button>
+<button id="photoBtn"
+class="active">
+写真
+</button>
 
-    <button id="videoBtn">
-      ビデオ
-    </button>
+<button id="videoBtn">
+ビデオ
+</button>
 
-  </div>
+</div>
 
-  <div class="bottom-row">
+<div class="bottom-row">
 
-    <div id="galleryPreview">
+<div id="galleryPreview">
 
-      <img id="lastMedia">
+<img id="lastMedia">
 
-    </div>
+</div>
 
-    <button id="shutter"></button>
+<button id="shutter"></button>
 
-  </div>
+</div>
+
+</div>
+
+<!-- ===================== -->
+<!-- GALLERY MODAL -->
+<!-- ===================== -->
+
+<div id="galleryModal">
+
+<div id="galleryHeader">
+
+<div>ギャラリー</div>
+
+<button id="closeGallery">
+✕
+</button>
+
+</div>
+
+<div id="galleryGrid"></div>
 
 </div>
 
@@ -484,6 +501,18 @@ document.getElementById("videoBtn");
 const lastMedia =
 document.getElementById("lastMedia");
 
+const galleryPreview =
+document.getElementById("galleryPreview");
+
+const galleryModal =
+document.getElementById("galleryModal");
+
+const galleryGrid =
+document.getElementById("galleryGrid");
+
+const closeGallery =
+document.getElementById("closeGallery");
+
 /* =========================================
    STATE
 ========================================= */
@@ -504,19 +533,21 @@ let timerInterval;
 
 let initialPinchDistance = null;
 
+let mediaList = [];
+
 /* =========================================
    CLOCK
 ========================================= */
 
 setInterval(() => {
 
-  document.getElementById("clock")
-    .innerText =
-      new Date()
-      .toLocaleTimeString(
-        "ja-JP",
-        {hour12:false}
-      );
+document.getElementById("clock")
+.innerText =
+new Date()
+.toLocaleTimeString(
+"ja-JP",
+{hour12:false}
+);
 
 },1000);
 
@@ -528,41 +559,41 @@ startCamera();
 
 async function startCamera(){
 
-  if(currentStream){
+if(currentStream){
 
-    currentStream
-      .getTracks()
-      .forEach(track => track.stop());
+currentStream
+.getTracks()
+.forEach(track => track.stop());
 
-  }
+}
 
-  try{
+try{
 
-    currentStream =
-      await navigator
-      .mediaDevices
-      .getUserMedia({
+currentStream =
+await navigator
+.mediaDevices
+.getUserMedia({
 
-        video:{
-          facingMode:facingMode,
-          width:{ideal:1920},
-          height:{ideal:1080}
-        },
+video:{
+facingMode:facingMode,
+width:{ideal:1920},
+height:{ideal:1080}
+},
 
-        audio:true
+audio:true
 
-      });
+});
 
-    video.srcObject =
-      currentStream;
+video.srcObject =
+currentStream;
 
-  }catch(error){
+}catch(error){
 
-    showStatus(
-      "カメラ起動エラー"
-    );
+showStatus(
+"カメラ起動エラー"
+);
 
-  }
+}
 
 }
 
@@ -572,14 +603,14 @@ async function startCamera(){
 
 function flipCamera(){
 
-  if(isRecording) return;
+if(isRecording) return;
 
-  facingMode =
-    facingMode === "environment"
-    ? "user"
-    : "environment";
+facingMode =
+facingMode === "environment"
+? "user"
+: "environment";
 
-  startCamera();
+startCamera();
 
 }
 
@@ -589,29 +620,47 @@ function flipCamera(){
 
 photoBtn.onclick = () => {
 
-  if(isRecording) return;
+if(isRecording) return;
 
-  currentMode = "photo";
+currentMode = "photo";
 
-  photoBtn.classList.add("active");
+photoBtn.classList.add("active");
 
-  videoBtn.classList.remove("active");
+videoBtn.classList.remove("active");
 
-  shutter.classList.remove("video");
+shutter.classList.remove("video");
 
 };
 
 videoBtn.onclick = () => {
 
-  if(isRecording) return;
+if(isRecording) return;
 
-  currentMode = "video";
+currentMode = "video";
 
-  videoBtn.classList.add("active");
+videoBtn.classList.add("active");
 
-  photoBtn.classList.remove("active");
+photoBtn.classList.remove("active");
 
-  shutter.classList.add("video");
+shutter.classList.add("video");
+
+};
+
+/* =========================================
+   GALLERY OPEN
+========================================= */
+
+galleryPreview.onclick = () => {
+
+galleryModal.style.display =
+"flex";
+
+};
+
+closeGallery.onclick = () => {
+
+galleryModal.style.display =
+"none";
 
 };
 
@@ -621,15 +670,15 @@ videoBtn.onclick = () => {
 
 shutter.onclick = () => {
 
-  if(currentMode === "photo"){
+if(currentMode === "photo"){
 
-    takePhoto();
+takePhoto();
 
-  }else{
+}else{
 
-    toggleRecording();
+toggleRecording();
 
-  }
+}
 
 };
 
@@ -639,139 +688,153 @@ shutter.onclick = () => {
 
 async function takePhoto(){
 
-  document.body.style.opacity = "0.7";
+document.body.style.opacity = "0.7";
 
-  setTimeout(() => {
-    document.body.style.opacity = "1";
-  },100);
+setTimeout(() => {
+document.body.style.opacity = "1";
+},100);
 
-  if(navigator.vibrate){
-    navigator.vibrate(100);
-  }
+if(navigator.vibrate){
+navigator.vibrate(100);
+}
 
-  showStatus("📸 撮影中...");
+showStatus("📸 撮影中...");
 
-  const canvas =
-    document.createElement("canvas");
+const canvas =
+document.createElement("canvas");
 
-  canvas.width =
-    video.videoWidth;
+canvas.width =
+video.videoWidth;
 
-  canvas.height =
-    video.videoHeight;
+canvas.height =
+video.videoHeight;
 
-  const ctx =
-    canvas.getContext("2d");
+const ctx =
+canvas.getContext("2d");
 
-  const zoom =
-    parseFloat(
-      zoomSlider.value
-    );
+const zoom =
+parseFloat(
+zoomSlider.value
+);
 
-  ctx.save();
+ctx.save();
 
-  ctx.translate(
-    canvas.width / 2,
-    canvas.height / 2
-  );
+ctx.translate(
+canvas.width / 2,
+canvas.height / 2
+);
 
-  ctx.scale(zoom, zoom);
+ctx.scale(zoom, zoom);
 
-  ctx.drawImage(
+ctx.drawImage(
 
-    video,
+video,
 
-    -canvas.width / 2,
-    -canvas.height / 2,
+-canvas.width / 2,
+-canvas.height / 2,
 
-    canvas.width,
-    canvas.height
+canvas.width,
+canvas.height
 
-  );
+);
 
-  ctx.restore();
+ctx.restore();
 
-  // =====================
-  // ギャラリー表示
-  // =====================
+/* =====================
+   ギャラリー表示
+===================== */
 
-  lastMedia.src =
-    canvas.toDataURL(
-      "image/jpeg",
-      0.7
-    );
+lastMedia.src =
+canvas.toDataURL(
+"image/jpeg",
+0.7
+);
 
-  // =====================
-  // Base64
-  // =====================
+/* =====================
+   一覧追加
+===================== */
 
-  const base64 =
-    canvas
-      .toDataURL(
-        "image/jpeg",
-        0.92
-      )
-      .split(",")[1];
+mediaList.unshift({
 
-  // =====================
-  // Upload
-  // =====================
+type:"image",
 
-  const data = {
+src:lastMedia.src
 
-    name:
-      "IMG_" +
-      Date.now() +
-      ".jpg",
+});
 
-    type:"image/jpeg",
+renderGallery();
 
-    file:base64
+/* =====================
+   Base64
+===================== */
 
-  };
+const base64 =
+canvas
+.toDataURL(
+"image/jpeg",
+0.92
+)
+.split(",")[1];
 
-  try{
+/* =====================
+   Upload
+===================== */
 
-    showStatus(
-      "⬆ Google Drive保存中..."
-    );
+const data = {
 
-    const response =
-      await fetch(
-        SCRIPT_URL,
-        {
+name:
+"IMG_" +
+Date.now() +
+".jpg",
 
-          method:"POST",
+type:"image/jpeg",
 
-          body:JSON.stringify(data)
+file:base64
 
-        }
-      );
+};
 
-    const result =
-      await response.json();
+try{
 
-    if(result.success){
+showStatus(
+"⬆ Google Drive保存中..."
+);
 
-      showStatus(
-        "✅ 自動保存完了"
-      );
+const response =
+await fetch(
+SCRIPT_URL,
+{
 
-    }else{
+method:"POST",
 
-      showStatus(
-        "❌ 保存失敗"
-      );
+body:JSON.stringify(data)
 
-    }
+}
+);
 
-  }catch(error){
+const result =
+await response.json();
 
-    showStatus(
-      "❌ 通信エラー"
-    );
+if(result.success){
 
-  }
+showStatus(
+"✅ 自動保存完了"
+);
+
+}else{
+
+showStatus(
+"❌ 保存失敗"
+);
+
+}
+
+}catch(error){
+
+showStatus(
+"❌ 通信エラー"
+);
+
+}
 
 }
 
@@ -781,184 +844,198 @@ async function takePhoto(){
 
 function toggleRecording(){
 
-  if(!isRecording){
+if(!isRecording){
 
-    startRecording();
+startRecording();
 
-  }else{
+}else{
 
-    stopRecording();
+stopRecording();
 
-  }
+}
 
 }
 
 function startRecording(){
 
-  const chunks = [];
+const chunks = [];
 
-  mediaRecorder =
-    new MediaRecorder(
-      currentStream
-    );
+mediaRecorder =
+new MediaRecorder(
+currentStream
+);
 
-  mediaRecorder.ondataavailable =
-    e => {
+mediaRecorder.ondataavailable =
+e => {
 
-      if(e.data.size > 0){
+if(e.data.size > 0){
 
-        chunks.push(e.data);
+chunks.push(e.data);
 
-      }
+}
 
-    };
+};
 
-  mediaRecorder.onstop =
-    async () => {
+mediaRecorder.onstop =
+async () => {
 
-      const blob =
-        new Blob(
-          chunks,
-          {
-            type:"video/webm"
-          }
-        );
+const blob =
+new Blob(
+chunks,
+{
+type:"video/webm"
+}
+);
 
-      // =====================
-      // ギャラリー更新
-      // =====================
+/* =====================
+   ギャラリー更新
+===================== */
 
-      const videoURL =
-        URL.createObjectURL(blob);
+const videoURL =
+URL.createObjectURL(blob);
 
-      lastMedia.src =
-        videoURL;
+lastMedia.src =
+videoURL;
 
-      const reader =
-        new FileReader();
+/* =====================
+   一覧追加
+===================== */
 
-      reader.onloadend =
-        async () => {
+mediaList.unshift({
 
-          const base64 =
-            reader.result
-              .split(",")[1];
+type:"video",
 
-          const data = {
+src:videoURL
 
-            name:
-              "VID_" +
-              Date.now() +
-              ".webm",
+});
 
-            type:"video/webm",
+renderGallery();
 
-            file:base64
+const reader =
+new FileReader();
 
-          };
+reader.onloadend =
+async () => {
 
-          try{
+const base64 =
+reader.result
+.split(",")[1];
 
-            await fetch(
-              SCRIPT_URL,
-              {
+const data = {
 
-                method:"POST",
+name:
+"VID_" +
+Date.now() +
+".webm",
 
-                body:JSON.stringify(data)
+type:"video/webm",
 
-              }
-            );
+file:base64
 
-            showStatus(
-              "✅ 動画保存完了"
-            );
+};
 
-          }catch(error){
+try{
 
-            showStatus(
-              "❌ 動画保存失敗"
-            );
+await fetch(
+SCRIPT_URL,
+{
 
-          }
+method:"POST",
 
-        };
+body:JSON.stringify(data)
 
-      reader.readAsDataURL(blob);
+}
+);
 
-    };
+showStatus(
+"✅ 動画保存完了"
+);
 
-  mediaRecorder.start();
+}catch(error){
 
-  isRecording = true;
+showStatus(
+"❌ 動画保存失敗"
+);
 
-  recordStart =
-    Date.now();
+}
 
-  shutter.classList.add(
-    "recording"
-  );
+};
 
-  timer.style.display =
-    "block";
+reader.readAsDataURL(blob);
 
-  timerInterval =
-    setInterval(
-      updateTimer,
-      1000
-    );
+};
 
-  showStatus(
-    "🎥 録画開始"
-  );
+mediaRecorder.start();
+
+isRecording = true;
+
+recordStart =
+Date.now();
+
+shutter.classList.add(
+"recording"
+);
+
+timer.style.display =
+"block";
+
+timerInterval =
+setInterval(
+updateTimer,
+1000
+);
+
+showStatus(
+"🎥 録画開始"
+);
 
 }
 
 function stopRecording(){
 
-  mediaRecorder.stop();
+mediaRecorder.stop();
 
-  isRecording = false;
+isRecording = false;
 
-  shutter.classList.remove(
-    "recording"
-  );
+shutter.classList.remove(
+"recording"
+);
 
-  timer.style.display =
-    "none";
+timer.style.display =
+"none";
 
-  clearInterval(
-    timerInterval
-  );
+clearInterval(
+timerInterval
+);
 
-  showStatus(
-    "🎥 録画終了"
-  );
+showStatus(
+"🎥 録画終了"
+);
 
 }
 
 function updateTimer(){
 
-  const sec =
-    Math.floor(
-      (
-        Date.now() -
-        recordStart
-      ) / 1000
-    );
+const sec =
+Math.floor(
+(
+Date.now() -
+recordStart
+) / 1000
+);
 
-  const m =
-    String(
-      Math.floor(sec / 60)
-    ).padStart(2,"0");
+const m =
+String(
+Math.floor(sec / 60)
+).padStart(2,"0");
 
-  const s =
-    String(
-      sec % 60
-    ).padStart(2,"0");
+const s =
+String(
+sec % 60
+).padStart(2,"0");
 
-  timer.innerText =
-    `${m}:${s}`;
+timer.innerText =
+`${m}:${s}`;
 
 }
 
@@ -968,31 +1045,31 @@ function updateTimer(){
 
 zoomSlider.oninput = () => {
 
-  applyZoom(
-    zoomSlider.value
-  );
+applyZoom(
+zoomSlider.value
+);
 
 };
 
 function applyZoom(v){
 
-  const value =
-    parseFloat(v)
-    .toFixed(1);
+const value =
+parseFloat(v)
+.toFixed(1);
 
-  video.style.transform =
-    `scale(${value})`;
+video.style.transform =
+`scale(${value})`;
 
-  zoomText.innerText =
-    value + " x";
+zoomText.innerText =
+value + " x";
 
 }
 
 zoomText.onclick = () => {
 
-  zoomSlider.value = 1;
+zoomSlider.value = 1;
 
-  applyZoom(1);
+applyZoom(1);
 
 };
 
@@ -1002,85 +1079,133 @@ zoomText.onclick = () => {
 
 window.addEventListener(
 
-  "touchstart",
+"touchstart",
 
-  e => {
+e => {
 
-    if(e.touches.length === 2){
+if(e.touches.length === 2){
 
-      initialPinchDistance =
-        Math.hypot(
+initialPinchDistance =
+Math.hypot(
 
-          e.touches[0].pageX -
-          e.touches[1].pageX,
+e.touches[0].pageX -
+e.touches[1].pageX,
 
-          e.touches[0].pageY -
-          e.touches[1].pageY
+e.touches[0].pageY -
+e.touches[1].pageY
 
-        );
+);
 
-    }
+}
 
-  },
+},
 
-  {passive:false}
+{passive:false}
 
 );
 
 window.addEventListener(
 
-  "touchmove",
+"touchmove",
 
-  e => {
+e => {
 
-    if(
-      e.touches.length === 2 &&
-      initialPinchDistance
-    ){
+if(
+e.touches.length === 2 &&
+initialPinchDistance
+){
 
-      const dist =
-        Math.hypot(
+const dist =
+Math.hypot(
 
-          e.touches[0].pageX -
-          e.touches[1].pageX,
+e.touches[0].pageX -
+e.touches[1].pageX,
 
-          e.touches[0].pageY -
-          e.touches[1].pageY
-
-        );
-
-      let value =
-        parseFloat(
-          zoomSlider.value
-        );
-
-      value +=
-        (
-          dist -
-          initialPinchDistance
-        ) / 150;
-
-      value =
-        Math.max(
-          1,
-          Math.min(10,value)
-        );
-
-      zoomSlider.value =
-        value;
-
-      applyZoom(value);
-
-      initialPinchDistance =
-        dist;
-
-    }
-
-  },
-
-  {passive:false}
+e.touches[0].pageY -
+e.touches[1].pageY
 
 );
+
+let value =
+parseFloat(
+zoomSlider.value
+);
+
+value +=
+(
+dist -
+initialPinchDistance
+) / 150;
+
+value =
+Math.max(
+1,
+Math.min(10,value)
+);
+
+zoomSlider.value =
+value;
+
+applyZoom(value);
+
+initialPinchDistance =
+dist;
+
+}
+
+},
+
+{passive:false}
+
+);
+
+/* =========================================
+   GALLERY RENDER
+========================================= */
+
+function renderGallery(){
+
+galleryGrid.innerHTML = "";
+
+mediaList.forEach(media => {
+
+const item =
+document.createElement("div");
+
+item.className =
+"gallery-item";
+
+if(media.type === "image"){
+
+item.innerHTML = `
+
+<img src="${media.src}">
+
+`;
+
+}else{
+
+item.innerHTML = `
+
+<video
+src="${media.src}"
+muted
+playsinline>
+</video>
+
+<div class="video-icon">
+▶
+</div>
+
+`;
+
+}
+
+galleryGrid.appendChild(item);
+
+});
+
+}
 
 /* =========================================
    STATUS
@@ -1088,23 +1213,23 @@ window.addEventListener(
 
 function showStatus(msg){
 
-  statusBox.innerText =
-    msg;
+statusBox.innerText =
+msg;
 
-  statusBox.style.display =
-    "block";
+statusBox.style.display =
+"block";
 
-  clearTimeout(
-    statusBox.timer
-  );
+clearTimeout(
+statusBox.timer
+);
 
-  statusBox.timer =
-    setTimeout(() => {
+statusBox.timer =
+setTimeout(() => {
 
-      statusBox.style.display =
-        "none";
+statusBox.style.display =
+"none";
 
-    },3000);
+},3000);
 
 }
 
