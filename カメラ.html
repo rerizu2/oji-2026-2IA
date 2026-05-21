@@ -2,11 +2,13 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+
 <meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
-               user-scalable=no">
+      content="
+      width=device-width,
+      initial-scale=1.0,
+      maximum-scale=1.0,
+      user-scalable=no">
 
 <title>Drive Camera</title>
 
@@ -43,17 +45,22 @@ html,body{
 }
 
 /* =========================
-   TOP BAR
+   TOP
 ========================= */
 
 .top-bar{
+
   position:fixed;
+
   top:0;
   left:0;
+
   width:100%;
+
   z-index:20;
 
   display:flex;
+
   justify-content:space-between;
   align-items:center;
 
@@ -67,6 +74,7 @@ html,body{
 #timer{
 
   color:white;
+
   font-size:16px;
   font-weight:bold;
 
@@ -76,13 +84,16 @@ html,body{
 #timer{
 
   background:red;
+
   padding:6px 14px;
+
   border-radius:999px;
+
   display:none;
 }
 
 /* =========================
-   BUTTONS
+   BUTTON
 ========================= */
 
 .icon-btn{
@@ -91,16 +102,46 @@ html,body{
   height:50px;
 
   border:none;
+
   border-radius:50%;
 
   background:rgba(255,255,255,0.15);
 
   color:white;
+
   font-size:24px;
 
   backdrop-filter:blur(10px);
 
   cursor:pointer;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+#status{
+
+  position:fixed;
+
+  top:120px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  background:rgba(0,0,0,0.8);
+
+  color:white;
+
+  padding:12px 20px;
+
+  border-radius:20px;
+
+  z-index:999;
+
+  font-size:14px;
+
+  display:none;
 }
 
 /* =========================
@@ -110,17 +151,20 @@ html,body{
 .zoom-wrap{
 
   position:fixed;
+
   bottom:180px;
-  left:0;
 
   width:100%;
 
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
-
   z-index:20;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  gap:10px;
 }
 
 #zoomText{
@@ -149,20 +193,24 @@ html,body{
 .bottom{
 
   position:fixed;
+
   bottom:0;
   left:0;
 
   width:100%;
 
-  padding-bottom:
-    calc(env(safe-area-inset-bottom) + 20px);
-
   z-index:20;
 
   display:flex;
+
   flex-direction:column;
+
   align-items:center;
+
   gap:20px;
+
+  padding-bottom:
+    calc(env(safe-area-inset-bottom) + 20px);
 
   background:
     linear-gradient(
@@ -174,17 +222,20 @@ html,body{
 .mode{
 
   display:flex;
+
   gap:40px;
 }
 
 .mode button{
 
   background:none;
+
   border:none;
 
   color:rgba(255,255,255,0.5);
 
   font-size:16px;
+
   font-weight:bold;
 }
 
@@ -247,47 +298,20 @@ html,body{
 }
 
 /* =========================
-   STATUS
-========================= */
-
-#status{
-
-  position:fixed;
-
-  top:120px;
-  left:50%;
-
-  transform:translateX(-50%);
-
-  z-index:999;
-
-  background:rgba(0,0,0,0.8);
-
-  color:white;
-
-  padding:12px 20px;
-
-  border-radius:20px;
-
-  font-size:14px;
-
-  display:none;
-}
-
-/* =========================
    LOCK
 ========================= */
 
 #lock{
 
   position:fixed;
+
   inset:0;
 
   background:black;
 
-  z-index:99999;
-
   color:white;
+
+  z-index:99999;
 
   display:none;
 
@@ -300,6 +324,10 @@ html,body{
 </style>
 </head>
 <body>
+
+<!-- ===================== -->
+<!-- LOCK -->
+<!-- ===================== -->
 
 <div id="lock">
   使用停止中
@@ -316,11 +344,21 @@ html,body{
     🔄
   </button>
 
-  <div id="timer">00:00</div>
+  <div id="timer">
+    00:00
+  </div>
 
-  <div id="clock">00:00:00</div>
+  <div id="clock">
+    00:00:00
+  </div>
 
 </div>
+
+<!-- ===================== -->
+<!-- STATUS -->
+<!-- ===================== -->
+
+<div id="status"></div>
 
 <!-- ===================== -->
 <!-- VIDEO -->
@@ -331,12 +369,6 @@ html,body{
        playsinline
        muted>
 </video>
-
-<!-- ===================== -->
-<!-- STATUS -->
-<!-- ===================== -->
-
-<div id="status"></div>
 
 <!-- ===================== -->
 <!-- ZOOM -->
@@ -382,16 +414,16 @@ html,body{
 
 <script>
 
-/* =========================
-   CONFIG
-========================= */
+/* =========================================
+   Apps Script URL
+========================================= */
 
 const SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbwXOLkJJikYlgtSDYWv_bfr7Y98mrXq5YGtcfSSfr99WAaVszrWoVUypnTajp3O3sWk3A/exec";
+"https://script.google.com/macros/s/AKfycbwW-3Lo7sZDBjmrzeZr3FfWbHeINwLi_dWGbsOIU-fkU9eFI0BsLqyk2Lsp8JXaPvDpRQ/exec";
 
-/* =========================
-   ELEMENTS
-========================= */
+/* =========================================
+   ELEMENT
+========================================= */
 
 const video =
 document.getElementById("video");
@@ -417,9 +449,9 @@ document.getElementById("photoBtn");
 const videoBtn =
 document.getElementById("videoBtn");
 
-/* =========================
+/* =========================================
    STATE
-========================= */
+========================================= */
 
 let currentMode = "photo";
 
@@ -437,24 +469,25 @@ let timerInterval;
 
 let initialPinchDistance = null;
 
-/* =========================
+/* =========================================
    CLOCK
-========================= */
+========================================= */
 
 setInterval(() => {
 
   document.getElementById("clock")
     .innerText =
       new Date()
-      .toLocaleTimeString("ja-JP", {
-        hour12:false
-      });
+      .toLocaleTimeString(
+        "ja-JP",
+        {hour12:false}
+      );
 
 },1000);
 
-/* =========================
+/* =========================================
    START CAMERA
-========================= */
+========================================= */
 
 startCamera();
 
@@ -464,14 +497,15 @@ async function startCamera(){
 
     currentStream
       .getTracks()
-      .forEach(t => t.stop());
+      .forEach(track => track.stop());
 
   }
 
   try{
 
     currentStream =
-      await navigator.mediaDevices
+      await navigator
+      .mediaDevices
       .getUserMedia({
 
         video:{
@@ -487,19 +521,19 @@ async function startCamera(){
     video.srcObject =
       currentStream;
 
-  }catch(err){
+  }catch(error){
 
     showStatus(
-      "カメラ起動失敗"
+      "カメラ起動エラー"
     );
 
   }
 
 }
 
-/* =========================
+/* =========================================
    FLIP CAMERA
-========================= */
+========================================= */
 
 function flipCamera(){
 
@@ -514,9 +548,9 @@ function flipCamera(){
 
 }
 
-/* =========================
+/* =========================================
    MODE
-========================= */
+========================================= */
 
 photoBtn.onclick = () => {
 
@@ -525,6 +559,7 @@ photoBtn.onclick = () => {
   currentMode = "photo";
 
   photoBtn.classList.add("active");
+
   videoBtn.classList.remove("active");
 
   shutter.classList.remove("video");
@@ -538,15 +573,16 @@ videoBtn.onclick = () => {
   currentMode = "video";
 
   videoBtn.classList.add("active");
+
   photoBtn.classList.remove("active");
 
   shutter.classList.add("video");
 
 };
 
-/* =========================
+/* =========================================
    SHUTTER
-========================= */
+========================================= */
 
 shutter.onclick = () => {
 
@@ -562,13 +598,37 @@ shutter.onclick = () => {
 
 };
 
-/* =========================
-   TAKE PHOTO
-========================= */
+/* =========================================
+   PHOTO
+========================================= */
 
 async function takePhoto(){
 
-  showStatus("保存中...");
+  // シャッター演出
+
+  document.body.style.opacity = "0.7";
+
+  setTimeout(() => {
+
+    document.body.style.opacity = "1";
+
+  },100);
+
+  // バイブ
+
+  if(navigator.vibrate){
+
+    navigator.vibrate(100);
+
+  }
+
+  showStatus(
+    "📸 撮影中..."
+  );
+
+  // =====================
+  // CANVAS
+  // =====================
 
   const canvas =
     document.createElement("canvas");
@@ -582,8 +642,14 @@ async function takePhoto(){
   const ctx =
     canvas.getContext("2d");
 
+  // =====================
+  // ZOOM
+  // =====================
+
   const zoom =
-    parseFloat(zoomSlider.value);
+    parseFloat(
+      zoomSlider.value
+    );
 
   ctx.save();
 
@@ -595,19 +661,34 @@ async function takePhoto(){
   ctx.scale(zoom, zoom);
 
   ctx.drawImage(
+
     video,
+
     -canvas.width / 2,
     -canvas.height / 2,
+
     canvas.width,
     canvas.height
+
   );
 
   ctx.restore();
 
+  // =====================
+  // BASE64
+  // =====================
+
   const base64 =
     canvas
-    .toDataURL("image/jpeg",0.9)
-    .split(",")[1];
+      .toDataURL(
+        "image/jpeg",
+        0.92
+      )
+      .split(",")[1];
+
+  // =====================
+  // DATA
+  // =====================
 
   const data = {
 
@@ -622,16 +703,27 @@ async function takePhoto(){
 
   };
 
+  // =====================
+  // AUTO UPLOAD
+  // =====================
+
   try{
 
+    showStatus(
+      "⬆ Google Drive保存中..."
+    );
+
     const response =
-      await fetch(SCRIPT_URL, {
+      await fetch(
+        SCRIPT_URL,
+        {
 
-        method:"POST",
+          method:"POST",
 
-        body:JSON.stringify(data)
+          body:JSON.stringify(data)
 
-      });
+        }
+      );
 
     const result =
       await response.json();
@@ -639,30 +731,30 @@ async function takePhoto(){
     if(result.success){
 
       showStatus(
-        "Google Drive保存完了"
+        "✅ 自動保存完了"
       );
 
     }else{
 
       showStatus(
-        "保存失敗"
+        "❌ 保存失敗"
       );
 
     }
 
-  }catch(err){
+  }catch(error){
 
     showStatus(
-      "通信エラー"
+      "❌ 通信エラー"
     );
 
   }
 
 }
 
-/* =========================
+/* =========================================
    VIDEO
-========================= */
+========================================= */
 
 function toggleRecording(){
 
@@ -702,9 +794,12 @@ function startRecording(){
     async () => {
 
       const blob =
-        new Blob(chunks, {
-          type:"video/webm"
-        });
+        new Blob(
+          chunks,
+          {
+            type:"video/webm"
+          }
+        );
 
       const reader =
         new FileReader();
@@ -714,7 +809,7 @@ function startRecording(){
 
           const base64 =
             reader.result
-            .split(",")[1];
+              .split(",")[1];
 
           const data = {
 
@@ -740,17 +835,16 @@ function startRecording(){
                 body:JSON.stringify(data)
 
               }
-
             );
 
             showStatus(
-              "動画保存完了"
+              "✅ 動画保存完了"
             );
 
-          }catch{
+          }catch(error){
 
             showStatus(
-              "アップロード失敗"
+              "❌ 動画保存失敗"
             );
 
           }
@@ -776,9 +870,14 @@ function startRecording(){
     "block";
 
   timerInterval =
-    setInterval(updateTimer,1000);
+    setInterval(
+      updateTimer,
+      1000
+    );
 
-  showStatus("録画開始");
+  showStatus(
+    "🎥 録画開始"
+  );
 
 }
 
@@ -795,9 +894,13 @@ function stopRecording(){
   timer.style.display =
     "none";
 
-  clearInterval(timerInterval);
+  clearInterval(
+    timerInterval
+  );
 
-  showStatus("録画終了");
+  showStatus(
+    "🎥 録画終了"
+  );
 
 }
 
@@ -805,8 +908,10 @@ function updateTimer(){
 
   const sec =
     Math.floor(
-      (Date.now() -
-       recordStart) / 1000
+      (
+        Date.now() -
+        recordStart
+      ) / 1000
     );
 
   const m =
@@ -815,17 +920,18 @@ function updateTimer(){
     ).padStart(2,"0");
 
   const s =
-    String(sec % 60)
-    .padStart(2,"0");
+    String(
+      sec % 60
+    ).padStart(2,"0");
 
   timer.innerText =
     `${m}:${s}`;
 
 }
 
-/* =========================
+/* =========================================
    ZOOM
-========================= */
+========================================= */
 
 zoomSlider.oninput = () => {
 
@@ -851,17 +957,18 @@ function applyZoom(v){
 
 zoomText.onclick = () => {
 
-  applyZoom(1);
-
   zoomSlider.value = 1;
+
+  applyZoom(1);
 
 };
 
-/* =========================
+/* =========================================
    PINCH ZOOM
-========================= */
+========================================= */
 
 window.addEventListener(
+
   "touchstart",
 
   e => {
@@ -888,6 +995,7 @@ window.addEventListener(
 );
 
 window.addEventListener(
+
   "touchmove",
 
   e => {
@@ -908,25 +1016,27 @@ window.addEventListener(
 
         );
 
-      let val =
+      let value =
         parseFloat(
           zoomSlider.value
         );
 
-      val +=
-        (dist -
-         initialPinchDistance)
-        / 150;
+      value +=
+        (
+          dist -
+          initialPinchDistance
+        ) / 150;
 
-      val =
+      value =
         Math.max(
           1,
-          Math.min(10,val)
+          Math.min(10,value)
         );
 
-      zoomSlider.value = val;
+      zoomSlider.value =
+        value;
 
-      applyZoom(val);
+      applyZoom(value);
 
       initialPinchDistance =
         dist;
@@ -939,13 +1049,14 @@ window.addEventListener(
 
 );
 
-/* =========================
+/* =========================================
    STATUS
-========================= */
+========================================= */
 
 function showStatus(msg){
 
-  statusBox.innerText = msg;
+  statusBox.innerText =
+    msg;
 
   statusBox.style.display =
     "block";
