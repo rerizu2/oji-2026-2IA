@@ -244,6 +244,60 @@ html,body{
 }
 
 /* =========================
+   BOTTOM ROW
+========================= */
+
+.bottom-row{
+
+  width:100%;
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  position:relative;
+}
+
+/* =========================
+   GALLERY
+========================= */
+
+#galleryPreview{
+
+  position:absolute;
+
+  right:30px;
+
+  width:60px;
+  height:60px;
+
+  border-radius:15px;
+
+  overflow:hidden;
+
+  background:rgba(255,255,255,0.1);
+
+  border:2px solid rgba(255,255,255,0.3);
+
+  backdrop-filter:blur(10px);
+
+  display:flex;
+
+  justify-content:center;
+  align-items:center;
+}
+
+#lastMedia{
+
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+}
+
+/* =========================
    SHUTTER
 ========================= */
 
@@ -297,41 +351,9 @@ html,body{
   left:22px;
 }
 
-/* =========================
-   LOCK
-========================= */
-
-#lock{
-
-  position:fixed;
-
-  inset:0;
-
-  background:black;
-
-  color:white;
-
-  z-index:99999;
-
-  display:none;
-
-  justify-content:center;
-  align-items:center;
-
-  font-size:24px;
-}
-
 </style>
 </head>
 <body>
-
-<!-- ===================== -->
-<!-- LOCK -->
-<!-- ===================== -->
-
-<div id="lock">
-  使用停止中
-</div>
 
 <!-- ===================== -->
 <!-- TOP -->
@@ -408,7 +430,17 @@ html,body{
 
   </div>
 
-  <button id="shutter"></button>
+  <div class="bottom-row">
+
+    <div id="galleryPreview">
+
+      <img id="lastMedia">
+
+    </div>
+
+    <button id="shutter"></button>
+
+  </div>
 
 </div>
 
@@ -448,6 +480,9 @@ document.getElementById("photoBtn");
 
 const videoBtn =
 document.getElementById("videoBtn");
+
+const lastMedia =
+document.getElementById("lastMedia");
 
 /* =========================================
    STATE
@@ -604,31 +639,17 @@ shutter.onclick = () => {
 
 async function takePhoto(){
 
-  // シャッター演出
-
   document.body.style.opacity = "0.7";
 
   setTimeout(() => {
-
     document.body.style.opacity = "1";
-
   },100);
 
-  // バイブ
-
   if(navigator.vibrate){
-
     navigator.vibrate(100);
-
   }
 
-  showStatus(
-    "📸 撮影中..."
-  );
-
-  // =====================
-  // CANVAS
-  // =====================
+  showStatus("📸 撮影中...");
 
   const canvas =
     document.createElement("canvas");
@@ -641,10 +662,6 @@ async function takePhoto(){
 
   const ctx =
     canvas.getContext("2d");
-
-  // =====================
-  // ZOOM
-  // =====================
 
   const zoom =
     parseFloat(
@@ -675,7 +692,17 @@ async function takePhoto(){
   ctx.restore();
 
   // =====================
-  // BASE64
+  // ギャラリー表示
+  // =====================
+
+  lastMedia.src =
+    canvas.toDataURL(
+      "image/jpeg",
+      0.7
+    );
+
+  // =====================
+  // Base64
   // =====================
 
   const base64 =
@@ -687,7 +714,7 @@ async function takePhoto(){
       .split(",")[1];
 
   // =====================
-  // DATA
+  // Upload
   // =====================
 
   const data = {
@@ -702,10 +729,6 @@ async function takePhoto(){
     file:base64
 
   };
-
-  // =====================
-  // AUTO UPLOAD
-  // =====================
 
   try{
 
@@ -800,6 +823,16 @@ function startRecording(){
             type:"video/webm"
           }
         );
+
+      // =====================
+      // ギャラリー更新
+      // =====================
+
+      const videoURL =
+        URL.createObjectURL(blob);
+
+      lastMedia.src =
+        videoURL;
 
       const reader =
         new FileReader();
