@@ -1,299 +1,969 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>カメラ → Google Drive</title>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
 
-  <style>
+<title>Drive Camera</title>
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-    }
+<style>
 
-    body{
-      font-family:sans-serif;
-      background:#f0f2f5;
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:20px;
-    }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
 
-    .card{
-      width:100%;
-      max-width:500px;
-      background:white;
-      padding:25px;
-      border-radius:20px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.1);
-    }
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:black;
+  font-family:sans-serif;
+}
 
-    h1{
-      text-align:center;
-      margin-bottom:20px;
-      color:#333;
-    }
+/* =========================
+   VIDEO
+========================= */
 
-    video,
-    canvas,
-    img{
-      width:100%;
-      border-radius:15px;
-      background:black;
-    }
+#video{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  object-fit:cover;
+  z-index:1;
+  transition:transform 0.1s linear;
+  background:black;
+}
 
-    canvas{
-      display:none;
-    }
+/* =========================
+   TOP BAR
+========================= */
 
-    img{
-      display:none;
-      margin-top:15px;
-    }
+.top-bar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  z-index:20;
 
-    .buttons{
-      display:flex;
-      gap:10px;
-      margin-top:15px;
-    }
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 
-    button{
-      flex:1;
-      padding:14px;
-      border:none;
-      border-radius:12px;
-      background:#4285f4;
-      color:white;
-      font-size:16px;
-      cursor:pointer;
-      transition:0.3s;
-    }
+  padding:
+    calc(env(safe-area-inset-top) + 15px)
+    20px
+    0;
+}
 
-    button:hover{
-      background:#1a73e8;
-    }
+#clock,
+#timer{
 
-    button:disabled{
-      background:#999;
-      cursor:not-allowed;
-    }
+  color:white;
+  font-size:16px;
+  font-weight:bold;
 
-    .status{
-      margin-top:20px;
-      text-align:center;
-      color:#333;
-      word-break:break-all;
-    }
+  text-shadow:0 0 10px black;
+}
 
-    .link{
-      display:inline-block;
-      margin-top:10px;
-      color:#1a73e8;
-      text-decoration:none;
-    }
+#timer{
 
-  </style>
+  background:red;
+  padding:6px 14px;
+  border-radius:999px;
+  display:none;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.icon-btn{
+
+  width:50px;
+  height:50px;
+
+  border:none;
+  border-radius:50%;
+
+  background:rgba(255,255,255,0.15);
+
+  color:white;
+  font-size:24px;
+
+  backdrop-filter:blur(10px);
+
+  cursor:pointer;
+}
+
+/* =========================
+   ZOOM
+========================= */
+
+.zoom-wrap{
+
+  position:fixed;
+  bottom:180px;
+  left:0;
+
+  width:100%;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+
+  z-index:20;
+}
+
+#zoomText{
+
+  background:rgba(0,0,0,0.5);
+
+  color:#ffdb00;
+
+  padding:6px 16px;
+
+  border-radius:999px;
+
+  font-weight:bold;
+}
+
+#zoomSlider{
+
+  width:70%;
+  max-width:300px;
+}
+
+/* =========================
+   BOTTOM
+========================= */
+
+.bottom{
+
+  position:fixed;
+  bottom:0;
+  left:0;
+
+  width:100%;
+
+  padding-bottom:
+    calc(env(safe-area-inset-bottom) + 20px);
+
+  z-index:20;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+
+  background:
+    linear-gradient(
+      transparent,
+      rgba(0,0,0,0.7)
+    );
+}
+
+.mode{
+
+  display:flex;
+  gap:40px;
+}
+
+.mode button{
+
+  background:none;
+  border:none;
+
+  color:rgba(255,255,255,0.5);
+
+  font-size:16px;
+  font-weight:bold;
+}
+
+.mode button.active{
+  color:#ffdb00;
+}
+
+/* =========================
+   SHUTTER
+========================= */
+
+#shutter{
+
+  width:85px;
+  height:85px;
+
+  border-radius:50%;
+
+  border:6px solid white;
+
+  background:white;
+
+  margin-bottom:20px;
+
+  position:relative;
+
+  cursor:pointer;
+}
+
+#shutter.video{
+  background:transparent;
+}
+
+#shutter.video::after{
+
+  content:"";
+
+  position:absolute;
+
+  width:48px;
+  height:48px;
+
+  background:red;
+
+  border-radius:50%;
+
+  top:12px;
+  left:12px;
+}
+
+#shutter.recording::after{
+
+  width:28px;
+  height:28px;
+
+  border-radius:8px;
+
+  top:22px;
+  left:22px;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+#status{
+
+  position:fixed;
+
+  top:120px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  z-index:999;
+
+  background:rgba(0,0,0,0.8);
+
+  color:white;
+
+  padding:12px 20px;
+
+  border-radius:20px;
+
+  font-size:14px;
+
+  display:none;
+}
+
+/* =========================
+   LOCK
+========================= */
+
+#lock{
+
+  position:fixed;
+  inset:0;
+
+  background:black;
+
+  z-index:99999;
+
+  color:white;
+
+  display:none;
+
+  justify-content:center;
+  align-items:center;
+
+  font-size:24px;
+}
+
+</style>
 </head>
 <body>
 
-  <div class="card">
+<div id="lock">
+  使用停止中
+</div>
 
-    <h1>📸 カメラアップロード</h1>
+<!-- ===================== -->
+<!-- TOP -->
+<!-- ===================== -->
 
-    <video id="video" autoplay playsinline></video>
+<div class="top-bar">
 
-    <canvas id="canvas"></canvas>
+  <button class="icon-btn"
+          onclick="flipCamera()">
+    🔄
+  </button>
 
-    <img id="preview">
+  <div id="timer">00:00</div>
 
-    <div class="buttons">
+  <div id="clock">00:00:00</div>
 
-      <button id="startBtn">
-        カメラ開始
-      </button>
+</div>
 
-      <button id="captureBtn" disabled>
-        撮影
-      </button>
+<!-- ===================== -->
+<!-- VIDEO -->
+<!-- ===================== -->
 
-    </div>
+<video id="video"
+       autoplay
+       playsinline
+       muted>
+</video>
 
-    <div class="buttons">
+<!-- ===================== -->
+<!-- STATUS -->
+<!-- ===================== -->
 
-      <button id="uploadBtn" disabled>
-        Google Driveへ保存
-      </button>
+<div id="status"></div>
 
-    </div>
+<!-- ===================== -->
+<!-- ZOOM -->
+<!-- ===================== -->
 
-    <div class="status" id="status"></div>
+<div class="zoom-wrap">
+
+  <div id="zoomText">
+    1.0 x
+  </div>
+
+  <input type="range"
+         id="zoomSlider"
+         min="1"
+         max="10"
+         step="0.1"
+         value="1">
+
+</div>
+
+<!-- ===================== -->
+<!-- BOTTOM -->
+<!-- ===================== -->
+
+<div class="bottom">
+
+  <div class="mode">
+
+    <button id="photoBtn"
+            class="active">
+      写真
+    </button>
+
+    <button id="videoBtn">
+      ビデオ
+    </button>
 
   </div>
 
-  <script>
+  <button id="shutter"></button>
 
-    // ====================================
-    // Apps Script URL
-    // ====================================
+</div>
 
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyyhsPFnyl-wwAG78RvhRnITXvH2Nue7KCaNXcgOK5tpqzM54daP7aOk0vHfu6dhFoeg/exec";
+<script>
 
-    // ====================================
-    // 要素
-    // ====================================
+/* =========================
+   CONFIG
+========================= */
 
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const preview = document.getElementById("preview");
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbzyyhsPFnyl-wwAG78RvhRnITXvH2Nue7KCaNXcgOK5tpqzM54daP7aOk0vHfu6dhFoeg/exec";
 
-    const startBtn = document.getElementById("startBtn");
-    const captureBtn = document.getElementById("captureBtn");
-    const uploadBtn = document.getElementById("uploadBtn");
+/* =========================
+   ELEMENTS
+========================= */
 
-    const status = document.getElementById("status");
+const video =
+document.getElementById("video");
 
-    let imageData = null;
+const shutter =
+document.getElementById("shutter");
 
-    // ====================================
-    // カメラ開始
-    // ====================================
+const timer =
+document.getElementById("timer");
 
-    startBtn.addEventListener("click", async () => {
+const statusBox =
+document.getElementById("status");
 
-      try{
+const zoomSlider =
+document.getElementById("zoomSlider");
 
-        const stream = await navigator.mediaDevices.getUserMedia({
+const zoomText =
+document.getElementById("zoomText");
 
-          video:{
-            facingMode:"environment"
-          },
-          audio:false
+const photoBtn =
+document.getElementById("photoBtn");
 
-        });
+const videoBtn =
+document.getElementById("videoBtn");
 
-        video.srcObject = stream;
+/* =========================
+   STATE
+========================= */
 
-        captureBtn.disabled = false;
+let currentMode = "photo";
 
-        status.innerHTML = "✅ カメラ起動";
+let currentStream = null;
 
-      }catch(error){
+let facingMode = "environment";
 
-        status.innerHTML = `
-          ❌ カメラ使用不可<br>
-          ${error}
-        `;
+let mediaRecorder;
+
+let isRecording = false;
+
+let recordStart;
+
+let timerInterval;
+
+let initialPinchDistance = null;
+
+/* =========================
+   CLOCK
+========================= */
+
+setInterval(() => {
+
+  document.getElementById("clock")
+    .innerText =
+      new Date()
+      .toLocaleTimeString("ja-JP", {
+        hour12:false
+      });
+
+},1000);
+
+/* =========================
+   START CAMERA
+========================= */
+
+startCamera();
+
+async function startCamera(){
+
+  if(currentStream){
+
+    currentStream
+      .getTracks()
+      .forEach(t => t.stop());
+
+  }
+
+  try{
+
+    currentStream =
+      await navigator.mediaDevices
+      .getUserMedia({
+
+        video:{
+          facingMode:facingMode,
+          width:{ideal:1920},
+          height:{ideal:1080}
+        },
+
+        audio:true
+
+      });
+
+    video.srcObject =
+      currentStream;
+
+  }catch(err){
+
+    showStatus(
+      "カメラ起動失敗"
+    );
+
+  }
+
+}
+
+/* =========================
+   FLIP CAMERA
+========================= */
+
+function flipCamera(){
+
+  if(isRecording) return;
+
+  facingMode =
+    facingMode === "environment"
+    ? "user"
+    : "environment";
+
+  startCamera();
+
+}
+
+/* =========================
+   MODE
+========================= */
+
+photoBtn.onclick = () => {
+
+  if(isRecording) return;
+
+  currentMode = "photo";
+
+  photoBtn.classList.add("active");
+  videoBtn.classList.remove("active");
+
+  shutter.classList.remove("video");
+
+};
+
+videoBtn.onclick = () => {
+
+  if(isRecording) return;
+
+  currentMode = "video";
+
+  videoBtn.classList.add("active");
+  photoBtn.classList.remove("active");
+
+  shutter.classList.add("video");
+
+};
+
+/* =========================
+   SHUTTER
+========================= */
+
+shutter.onclick = () => {
+
+  if(currentMode === "photo"){
+
+    takePhoto();
+
+  }else{
+
+    toggleRecording();
+
+  }
+
+};
+
+/* =========================
+   TAKE PHOTO
+========================= */
+
+async function takePhoto(){
+
+  showStatus("保存中...");
+
+  const canvas =
+    document.createElement("canvas");
+
+  canvas.width =
+    video.videoWidth;
+
+  canvas.height =
+    video.videoHeight;
+
+  const ctx =
+    canvas.getContext("2d");
+
+  const zoom =
+    parseFloat(zoomSlider.value);
+
+  ctx.save();
+
+  ctx.translate(
+    canvas.width / 2,
+    canvas.height / 2
+  );
+
+  ctx.scale(zoom, zoom);
+
+  ctx.drawImage(
+    video,
+    -canvas.width / 2,
+    -canvas.height / 2,
+    canvas.width,
+    canvas.height
+  );
+
+  ctx.restore();
+
+  const base64 =
+    canvas
+    .toDataURL("image/jpeg",0.9)
+    .split(",")[1];
+
+  const data = {
+
+    name:
+      "IMG_" +
+      Date.now() +
+      ".jpg",
+
+    type:"image/jpeg",
+
+    file:base64
+
+  };
+
+  try{
+
+    const response =
+      await fetch(SCRIPT_URL, {
+
+        method:"POST",
+
+        body:JSON.stringify(data)
+
+      });
+
+    const result =
+      await response.json();
+
+    if(result.success){
+
+      showStatus(
+        "Google Drive保存完了"
+      );
+
+    }else{
+
+      showStatus(
+        "保存失敗"
+      );
+
+    }
+
+  }catch(err){
+
+    showStatus(
+      "通信エラー"
+    );
+
+  }
+
+}
+
+/* =========================
+   VIDEO
+========================= */
+
+function toggleRecording(){
+
+  if(!isRecording){
+
+    startRecording();
+
+  }else{
+
+    stopRecording();
+
+  }
+
+}
+
+function startRecording(){
+
+  const chunks = [];
+
+  mediaRecorder =
+    new MediaRecorder(
+      currentStream
+    );
+
+  mediaRecorder.ondataavailable =
+    e => {
+
+      if(e.data.size > 0){
+
+        chunks.push(e.data);
 
       }
 
-    });
+    };
 
-    // ====================================
-    // 撮影
-    // ====================================
+  mediaRecorder.onstop =
+    async () => {
 
-    captureBtn.addEventListener("click", () => {
+      const blob =
+        new Blob(chunks, {
+          type:"video/webm"
+        });
 
-      const context = canvas.getContext("2d");
+      const reader =
+        new FileReader();
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      reader.onloadend =
+        async () => {
 
-      context.drawImage(
-        video,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
+          const base64 =
+            reader.result
+            .split(",")[1];
 
-      imageData = canvas.toDataURL("image/jpeg", 0.9);
+          const data = {
 
-      preview.src = imageData;
-      preview.style.display = "block";
+            name:
+              "VID_" +
+              Date.now() +
+              ".webm",
 
-      uploadBtn.disabled = false;
+            type:"video/webm",
 
-      status.innerHTML = "📷 撮影完了";
+            file:base64
 
-    });
+          };
 
-    // ====================================
-    // Google Driveへ保存
-    // ====================================
+          try{
 
-    uploadBtn.addEventListener("click", async () => {
+            await fetch(
+              SCRIPT_URL,
+              {
 
-      if(!imageData) return;
+                method:"POST",
 
-      status.innerHTML = "⬆ アップロード中...";
+                body:JSON.stringify(data)
 
-      uploadBtn.disabled = true;
+              }
 
-      try{
+            );
 
-        const base64 = imageData.split(",")[1];
+            showStatus(
+              "動画保存完了"
+            );
 
-        const data = {
+          }catch{
 
-          name: "camera_" + Date.now() + ".jpg",
-          type: "image/jpeg",
-          file: base64
+            showStatus(
+              "アップロード失敗"
+            );
+
+          }
 
         };
 
-        const response = await fetch(SCRIPT_URL, {
+      reader.readAsDataURL(blob);
 
-          method:"POST",
-          body:JSON.stringify(data)
+    };
 
-        });
+  mediaRecorder.start();
 
-        const result = await response.json();
+  isRecording = true;
 
-        if(result.success){
+  recordStart =
+    Date.now();
 
-          status.innerHTML = `
+  shutter.classList.add(
+    "recording"
+  );
 
-            ✅ 保存成功<br>
+  timer.style.display =
+    "block";
 
-            <a class="link"
-               href="${result.url}"
-               target="_blank">
+  timerInterval =
+    setInterval(updateTimer,1000);
 
-              Google Driveで開く
+  showStatus("録画開始");
 
-            </a>
+}
 
-          `;
+function stopRecording(){
 
-        }else{
+  mediaRecorder.stop();
 
-          status.innerHTML = `
-            ❌ エラー<br>
-            ${result.error}
-          `;
+  isRecording = false;
 
-        }
+  shutter.classList.remove(
+    "recording"
+  );
 
-      }catch(error){
+  timer.style.display =
+    "none";
 
-        status.innerHTML = `
-          ❌ 通信エラー<br>
-          ${error}
-        `;
+  clearInterval(timerInterval);
 
-      }
+  showStatus("録画終了");
 
-      uploadBtn.disabled = false;
+}
 
-    });
+function updateTimer(){
 
-  </script>
+  const sec =
+    Math.floor(
+      (Date.now() -
+       recordStart) / 1000
+    );
 
+  const m =
+    String(
+      Math.floor(sec / 60)
+    ).padStart(2,"0");
+
+  const s =
+    String(sec % 60)
+    .padStart(2,"0");
+
+  timer.innerText =
+    `${m}:${s}`;
+
+}
+
+/* =========================
+   ZOOM
+========================= */
+
+zoomSlider.oninput = () => {
+
+  applyZoom(
+    zoomSlider.value
+  );
+
+};
+
+function applyZoom(v){
+
+  const value =
+    parseFloat(v)
+    .toFixed(1);
+
+  video.style.transform =
+    `scale(${value})`;
+
+  zoomText.innerText =
+    value + " x";
+
+}
+
+zoomText.onclick = () => {
+
+  applyZoom(1);
+
+  zoomSlider.value = 1;
+
+};
+
+/* =========================
+   PINCH ZOOM
+========================= */
+
+window.addEventListener(
+  "touchstart",
+
+  e => {
+
+    if(e.touches.length === 2){
+
+      initialPinchDistance =
+        Math.hypot(
+
+          e.touches[0].pageX -
+          e.touches[1].pageX,
+
+          e.touches[0].pageY -
+          e.touches[1].pageY
+
+        );
+
+    }
+
+  },
+
+  {passive:false}
+
+);
+
+window.addEventListener(
+  "touchmove",
+
+  e => {
+
+    if(
+      e.touches.length === 2 &&
+      initialPinchDistance
+    ){
+
+      const dist =
+        Math.hypot(
+
+          e.touches[0].pageX -
+          e.touches[1].pageX,
+
+          e.touches[0].pageY -
+          e.touches[1].pageY
+
+        );
+
+      let val =
+        parseFloat(
+          zoomSlider.value
+        );
+
+      val +=
+        (dist -
+         initialPinchDistance)
+        / 150;
+
+      val =
+        Math.max(
+          1,
+          Math.min(10,val)
+        );
+
+      zoomSlider.value = val;
+
+      applyZoom(val);
+
+      initialPinchDistance =
+        dist;
+
+    }
+
+  },
+
+  {passive:false}
+
+);
+
+/* =========================
+   STATUS
+========================= */
+
+function showStatus(msg){
+
+  statusBox.innerText = msg;
+
+  statusBox.style.display =
+    "block";
+
+  clearTimeout(
+    statusBox.timer
+  );
+
+  statusBox.timer =
+    setTimeout(() => {
+
+      statusBox.style.display =
+        "none";
+
+    },3000);
+
+}
+
+</script>
 </body>
 </html>
