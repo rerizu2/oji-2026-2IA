@@ -2,7 +2,7 @@
 <html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>7×7席替えツール（Ctrlクリック後方指定版）</title>
+<title>7×7席替えツール（後方グループシャッフル版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
@@ -69,8 +69,8 @@ textarea { width: 100%; height: 100px; box-sizing: border-box; padding: 8px; res
 table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-top: 10px; }
 th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em; }
 
-/* 隠し設定用スタイル */
-.is-back-row { background-color: #f2f4f6 !important; } /* Ctrl+クリック時の微かな変化 */
+/* 隠し設定用スタイル：極めて薄い色でバレないように */
+.is-back-row { background-color: #f7f8f9 !important; } 
 
 #miniSeating { 
   display: flex; flex-direction: column; gap: 4px; 
@@ -107,10 +107,9 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
     </table>
     <button id="addRowBtn" style="width:100%; margin-top:10px;">＋ 行を追加</button>
     <p style="font-size:0.72em; color:#666; margin-top:8px;">
-      <b>配置のヒント:</b><br>
-      ・「前方」チェック：教卓から近い順に配置。<br>
-      ・<b>Ctrl＋クリック：</b>対象の行が後方優先になります。<br>
-      （行の色がわずかに変わりますが、PDFには反映されません）
+      <b>配置ルール:</b><br>
+      ・「前方」チェック：教卓に近い順に配置。<br>
+      ・<b>Ctrl＋行クリック：</b>その生徒を「後方グループ」に指定（複数いる場合は後方内でシャッフル）。
     </p>
 
     <div style="text-align:center; margin-top:15px; font-weight:bold; font-size:0.9em;">【空席設定】</div>
@@ -157,7 +156,7 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
 <script>
 const ROWS = 7;
 const COLS = 7;
-const STORAGE_KEY = "seating_ctrl_v13";
+const STORAGE_KEY = "seating_ctrl_shuffle_v14";
 const tbody = document.querySelector("#studentTable tbody");
 const areaStudent = document.getElementById("seatingAreaStudent");
 const areaTeacher = document.getElementById("seatingAreaTeacher");
@@ -177,7 +176,7 @@ function saveData() {
     title: document.getElementById("pdfTitle").innerText
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  showStatus("✅ 保存しました。", "#2e7d32");
+  showStatus("✅ 保存完了。", "#2e7d32");
 }
 
 function loadData() {
@@ -231,15 +230,13 @@ function createRow(num = "", name = "", kana = "", checked=false, isBack=false) 
   
   if(checked) tr.classList.add("checked");
   
-  // チェックボックス連動
   tr.querySelector("input").addEventListener("change", (e) => tr.classList.toggle("checked", e.target.checked));
   
-  // ★Ctrl＋クリックで「後方指定」をトグル
+  // Ctrl＋クリックで「後方指定」をトグル
   tr.addEventListener("click", (e) => {
     if (e.ctrlKey) {
       tr.classList.toggle("is-back-row");
-      showStatus("優先度を切り替えました", "#777");
-      // テキスト選択を解除
+      showStatus("優先度設定を更新", "#777");
       window.getSelection().removeAllRanges();
     }
   });
@@ -282,34 +279,42 @@ function renderMiniSeats() {
   }
 }
 
+const shuffleArray = (arr) => {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+};
+
 function doShuffleProcess() {
   const tableStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
   
-  // 3グループ： 前方、後方、通常
-  const checkedStudents = tableStudents.filter(s => s.checked); 
-  const backStudents = tableStudents.filter(s => s.isBack && !s.checked); 
-  const normalStudents = tableStudents.filter(s => !s.checked && !s.isBack); 
+  // グループ分け
+  const checkedGroup = tableStudents.filter(s => s.checked); 
+  const backGroup = tableStudents.filter(s => s.isBack && !s.checked); 
+  const normalGroup = tableStudents.filter(s => !s.checked && !s.isBack); 
   
-  const shuffle = (arr) => {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
+  // 各グループ内でシャッフル
+  shuffleArray(checkedGroup);
+  shuffleArray(backGroup);
+  shuffleArray(normalGroup);
+
+  // 全体順序として結合（renderAll側で順番に座席へ割り当てる）
+  // 順序の考え方：[前方の人たち]...[普通の人たち]...[後ろの人たち]
+  currentStudentOrder = {
+    front: checkedGroup,
+    back: backGroup,
+    normal: normalGroup
   };
-
-  shuffle(checkedStudents);
-  shuffle(backStudents);
-  shuffle(normalStudents);
-
-  // 結合順：[前方] + [通常] + [後方]
-  // 座席配置ロジックでこの順に従って前から詰めていく
-  currentStudentOrder = [...checkedStudents, ...normalStudents, ...backStudents];
+  
   renderAll();
 }
 
 function renderAll() {
-  if (currentStudentOrder.length === 0) {
-    currentStudentOrder = getCurrentStudentsFromTable().filter(s => s.name !== "");
+  if (!currentStudentOrder.front) {
+    // 初回読み込み用
+    const tableStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
+    currentStudentOrder = { front: [], back: [], normal: tableStudents };
   }
 
   const seatMap = Array.from({length: ROWS}, () => new Array(COLS).fill(null));
@@ -320,43 +325,39 @@ function renderAll() {
     }
   }
 
-  const checkedCount = currentStudentOrder.filter(s => s.checked).length;
-  const backCount = currentStudentOrder.filter(s => s.isBack && !s.checked).length;
-  const normalCount = currentStudentOrder.length - checkedCount - backCount;
-
-  // 座席プール（前から順、後ろから順）
-  const frontPool = [...availableSeats].sort((a, b) => a.r - b.r || a.c - b.c);
-  const backPool = [...availableSeats].sort((a, b) => b.r - a.r || a.c - b.c);
+  // 席順の定義
+  const frontToBackSeats = [...availableSeats].sort((a, b) => a.r - b.r || a.c - b.c);
+  const backToFrontSeats = [...availableSeats].sort((a, b) => b.r - a.r || a.c - b.c);
 
   const usedKeys = new Set();
 
-  // 1. 前方優先の配置
-  for(let i=0; i < checkedCount; i++) {
-    const s = frontPool[i];
+  // 1. 前方優先グループの配置（一番前の席から）
+  currentStudentOrder.front.forEach((st, i) => {
+    const s = frontToBackSeats.find(seat => !usedKeys.has(`${seat.r}-${seat.c}`));
     if(s) {
-      seatMap[s.r][s.c] = currentStudentOrder[i];
+      seatMap[s.r][s.c] = st;
       usedKeys.add(`${s.r}-${s.c}`);
     }
-  }
+  });
 
-  // 2. 後方優先の配置
-  for(let i=0; i < backCount; i++) {
-    const s = backPool.find(seat => !usedKeys.has(`${seat.r}-${seat.c}`));
+  // 2. 後方グループの配置（一番後ろの席から埋めていく）
+  currentStudentOrder.back.forEach((st, i) => {
+    const s = backToFrontSeats.find(seat => !usedKeys.has(`${seat.r}-${seat.c}`));
     if(s) {
-      seatMap[s.r][s.c] = currentStudentOrder[checkedCount + normalCount + i];
+      seatMap[s.r][s.c] = st;
       usedKeys.add(`${s.r}-${s.c}`);
     }
-  }
+  });
 
-  // 3. 通常の人の配置（縦並び）
+  // 3. 通常グループの配置（残りの席に、縦並びルールで配置）
   const remainingSeats = availableSeats
     .filter(s => !usedKeys.has(`${s.r}-${s.c}`))
     .sort((a, b) => a.c - b.c || a.r - b.r);
 
-  for(let i=0; i < normalCount; i++) {
+  currentStudentOrder.normal.forEach((st, i) => {
     const s = remainingSeats[i];
-    if(s) seatMap[s.r][s.c] = currentStudentOrder[checkedCount + i];
-  }
+    if(s) seatMap[s.r][s.c] = st;
+  });
 
   renderView(areaStudent, seatMap, false);
   renderView(areaTeacher, seatMap, true);
@@ -396,8 +397,7 @@ document.getElementById("addNamesBtn").addEventListener("click", () => {
     const parts = line.trim().split(/[\s　]+/);
     createRow(i+1, parts[0] || "", parts[1] || "");
   });
-  currentStudentOrder = getCurrentStudentsFromTable().filter(s => s.name !== "");
-  renderAll();
+  doShuffleProcess();
 });
 
 document.getElementById("shuffleBtn").addEventListener("click", () => {
@@ -405,7 +405,7 @@ document.getElementById("shuffleBtn").addEventListener("click", () => {
   let count = 0;
   const timer = setInterval(() => {
     doShuffleProcess(); count++;
-    statusText.textContent = `シャッフル中... (${count}/${times})`;
+    statusText.textContent = `入れ替え中... (${count}/${times})`;
     if(count >= times) { 
       clearInterval(timer); showStatus("✨ 完了しました。", "#e64a19");
     }
