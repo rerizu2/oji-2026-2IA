@@ -2,7 +2,7 @@
 <html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>7×7席替えツール（後方流動シャッフル版）</title>
+<title>7×7席替えツール（別窓表示対応版）</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
@@ -36,6 +36,7 @@ body {
 select, button, input { padding: 8px 12px; font-size: 1em; border-radius: 6px; border: 1px solid #888; }
 
 #shuffleBtn { background: linear-gradient(180deg, #64b5f6, #1e88e5); color: white; border: none; font-weight: bold; }
+#popoutBtn { background: linear-gradient(180deg, #9575cd, #5e35b1); color: white; border: none; font-weight: bold; }
 #saveBtn { background: linear-gradient(180deg, #81c784, #388e3c); color: white; border: none; font-weight: bold; }
 #pdfBtn { background: linear-gradient(180deg, #ff8a65, #e64a19); color: white; border: none; font-weight: bold; }
 #resetBtn { background: linear-gradient(180deg, #ef9a9a, #d32f2f); color: white; border: none; font-weight: bold; }
@@ -63,13 +64,10 @@ button:hover { opacity: 0.8; cursor: pointer; }
   font-size: calc(var(--base-font) * var(--print-scale));
 }
 #teacherPdfArea .row { gap: calc(10px * var(--print-scale)); margin-bottom: calc(10px * var(--print-scale)); }
-#teacherPdfArea rt { font-size: 0.65em; }
 
 textarea { width: 100%; height: 100px; box-sizing: border-box; padding: 8px; resize: none; }
 table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-top: 10px; }
 th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em; }
-
-/* 管理画面でのみ表示される微かな色 */
 .is-back-row { background-color: #fafafa !important; } 
 
 #miniSeating { 
@@ -107,10 +105,8 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
     </table>
     <button id="addRowBtn" style="width:100%; margin-top:10px;">＋ 行を追加</button>
     <p style="font-size:0.72em; color:#666; margin-top:8px;">
-      <b>配置ルール:</b><br>
-      ・「前方」チェック：最前列から順に配置。<br>
-      ・<b>Ctrl＋行クリック：</b>その生徒を「後方グループ」に指定。<br>
-      ※指定が1人でも、最後列のどこかにランダムで配置されます。
+      ・<b>Ctrl＋行クリック：</b>後方グループ指定。<br>
+      ・「前方」チェック：最前列優先。
     </p>
 
     <div style="text-align:center; margin-top:15px; font-weight:bold; font-size:0.9em;">【空席設定】</div>
@@ -124,23 +120,23 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
       <div>
         シャッフル：<select id="shuffleCount"></select>
         <button id="shuffleBtn">席替え実行</button>
+        <button id="popoutBtn">📺 別窓で表示</button>
       </div>
       
       <div class="scale-ctrl">
-        <span>印刷サイズ:</span>
+        <span>サイズ:</span>
         <input type="range" id="scaleSlider" min="0.5" max="1.5" step="0.05" value="1.0">
-        <span id="scaleValue">100%</span>
       </div>
 
       <button id="saveBtn">💾 保存</button>
-      <button id="pdfBtn">📄 PDF出力</button>
+      <button id="pdfBtn">📄 PDF</button>
       <button id="resetBtn">🗑 削除</button>
     </div>
     <div id="statusText" class="status-msg"></div>
   </div>
 
   <div class="container">
-    <div style="text-align:center; color:#1976d2; font-weight:bold; margin-bottom:5px;">【学生用表示】</div>
+    <div style="text-align:center; color:#1976d2; font-weight:bold; margin-bottom:5px;">【学生用（教卓が上）】</div>
     <div class="teacher">教卓</div>
     <div id="seatingAreaStudent"></div>
   </div>
@@ -157,13 +153,14 @@ th, td { border:1px solid #ccc; padding:4px; text-align:center; font-size: 0.8em
 <script>
 const ROWS = 7;
 const COLS = 7;
-const STORAGE_KEY = "seating_ctrl_random_v15";
+const STORAGE_KEY = "seating_popout_v16";
 const tbody = document.querySelector("#studentTable tbody");
 const areaStudent = document.getElementById("seatingAreaStudent");
 const areaTeacher = document.getElementById("seatingAreaTeacher");
 const statusText = document.getElementById("statusText");
 const hiddenSeats = new Set();
 let currentStudentOrderMap = { front:[], back:[], normal:[] };
+let studentWin = null; // 別窓用オブジェクト
 
 // --- データ管理 ---
 
@@ -199,10 +196,35 @@ function loadData() {
   renderMiniSeats(); renderAll();
 }
 
-function deleteData() {
-  if (confirm("全てリセットしますか？")) {
-    localStorage.removeItem(STORAGE_KEY);
-    location.reload();
+// --- 別窓表示システム ---
+
+function openStudentWindow() {
+  if (studentWin && !studentWin.closed) {
+    studentWin.focus();
+    return;
+  }
+  studentWin = window.open("", "StudentWindow", "width=900,height=800");
+  const style = document.querySelector('style').innerHTML;
+  studentWin.document.write(`
+    <html><head><title>生徒用座席表</title><style>${style}</style></head>
+    <body style="background:#fff;">
+      <div style="text-align:center; padding:20px;">
+        <div class="teacher">教卓</div>
+        <div id="displayArea"></div>
+      </div>
+    </body></html>`);
+  syncStudentWindow();
+}
+
+function syncStudentWindow() {
+  if (studentWin && !studentWin.closed) {
+    const area = studentWin.document.getElementById("displayArea");
+    if (area) {
+      area.innerHTML = areaStudent.innerHTML;
+      // スケールを適用
+      const scale = document.getElementById("scaleSlider").value;
+      studentWin.document.documentElement.style.setProperty('--print-scale', scale);
+    }
   }
 }
 
@@ -219,11 +241,9 @@ function createRow(num = "", name = "", kana = "", checked=false, isBack=false) 
   
   if(checked) tr.classList.add("checked");
   tr.querySelector("input").addEventListener("change", (e) => tr.classList.toggle("checked", e.target.checked));
-  
   tr.addEventListener("click", (e) => {
     if (e.ctrlKey) {
       tr.classList.toggle("is-back-row");
-      showStatus("優先度設定を更新", "#777");
       window.getSelection().removeAllRanges();
     }
   });
@@ -236,10 +256,7 @@ function getCurrentStudentsFromTable(){
     const spans = tr.querySelectorAll("span");
     const checked = tr.querySelector("input").checked;
     const isBack = tr.classList.contains("is-back-row");
-    arr.push({
-      num: spans[0].textContent.trim(), name: spans[1].textContent.trim(), 
-      kana: spans[2].textContent.trim(), checked, isBack
-    });
+    arr.push({ num: spans[0].textContent.trim(), name: spans[1].textContent.trim(), kana: spans[2].textContent.trim(), checked, isBack });
   });
   return arr;
 }
@@ -253,15 +270,10 @@ const shuffleArray = (arr) => {
 
 function doShuffleProcess() {
   const tableStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
-  
   const front = tableStudents.filter(s => s.checked);
   const back = tableStudents.filter(s => s.isBack && !s.checked);
   const normal = tableStudents.filter(s => !s.checked && !s.isBack);
-  
-  shuffleArray(front);
-  shuffleArray(back);
-  shuffleArray(normal);
-
+  shuffleArray(front); shuffleArray(back); shuffleArray(normal);
   currentStudentOrderMap = { front, back, normal };
   renderAll();
 }
@@ -270,68 +282,43 @@ function renderAll() {
   const tableStudents = getCurrentStudentsFromTable().filter(s => s.name !== "");
   if (tableStudents.length === 0) return;
 
-  // 座席リストの作成
   const availableSeats = [];
-  for(let r=0; r<ROWS; r++) {
-    for(let c=0; c<COLS; c++) {
-      if(!hiddenSeats.has(`${r}-${c}`)) availableSeats.push({r, c});
-    }
-  }
+  for(let r=0; r<ROWS; r++) for(let c=0; c<COLS; c++) if(!hiddenSeats.has(`${r}-${c}`)) availableSeats.push({r, c});
 
   const seatMap = Array.from({length: ROWS}, () => new Array(COLS).fill(null));
   const usedSeatKeys = new Set();
 
-  // 1. 前方優先グループ (前から順)
+  // 1. 前方
   const frontSeats = [...availableSeats].sort((a,b)=> a.r - b.r || a.c - b.c);
   currentStudentOrderMap.front.forEach(st => {
     const s = frontSeats.find(seat => !usedSeatKeys.has(`${seat.r}-${seat.c}`));
     if(s){ seatMap[s.r][s.c] = st; usedSeatKeys.add(`${s.r}-${s.c}`); }
   });
 
-  // 2. 後方シャッフルゾーンの構築
-  // 後方指定が1人でも、少なくとも1列分(7席)は「後方ゾーン」として確保し、混ぜ合わせる
+  // 2. 後方ゾーン（指定者が1人でも最後列をシャッフルゾーンにする）
   const backSeatPool = [...availableSeats].sort((a,b)=> b.r - a.r || a.c - b.c);
-  const minBackZoneSize = Math.min(availableSeats.length - usedSeatKeys.size, Math.max(COLS, currentStudentOrderMap.back.length));
-  
+  const backZoneSize = Math.min(availableSeats.length - usedSeatKeys.size, Math.max(COLS, currentStudentOrderMap.back.length));
   const backZoneSeats = [];
-  for(let i=0; i<backSeatPool.length; i++){
-    if(!usedSeatKeys.has(`${backSeatPool[i].r}-${backSeatPool[i].c}`) && backZoneSeats.length < minBackZoneSize){
-      backZoneSeats.push(backSeatPool[i]);
-    }
+  for(let i=0; i<backSeatPool.length && backZoneSeats.length < backZoneSize; i++){
+    if(!usedSeatKeys.has(`${backSeatPool[i].r}-${backSeatPool[i].c}`)) backZoneSeats.push(backSeatPool[i]);
   }
-
-  // 後方ゾーンに入れるメンツ： 後方指定生徒 + 足りない分を通常生徒から補充
   const backZonePeople = [...currentStudentOrderMap.back];
   const normalPool = [...currentStudentOrderMap.normal];
+  while(backZonePeople.length < backZoneSeats.length && normalPool.length > 0) backZonePeople.push(normalPool.pop());
   
-  while(backZonePeople.length < backZoneSeats.length && normalPool.length > 0){
-    backZonePeople.push(normalPool.pop());
-  }
-  
-  // ゾーン内でシャッフルして配置
   shuffleArray(backZonePeople);
   backZoneSeats.forEach((seat, i) => {
-    if(backZonePeople[i]){
-      seatMap[seat.r][seat.c] = backZonePeople[i];
-      usedSeatKeys.add(`${seat.r}-${seat.c}`);
-    }
+    if(backZonePeople[i]){ seatMap[seat.r][seat.c] = backZonePeople[i]; usedSeatKeys.add(`${seat.r}-${seat.c}`); }
   });
 
-  // 3. 残りの通常生徒を配置
-  const remainingSeats = availableSeats
-    .filter(s => !usedSeatKeys.has(`${s.r}-${s.c}`))
-    .sort((a, b) => a.c - b.c || a.r - b.r); // デフォルトは縦並び
-
-  normalPool.forEach((st, i) => {
-    const s = remainingSeats[i];
-    if(s) seatMap[s.r][s.c] = st;
-  });
+  // 3. 通常
+  const remainingSeats = availableSeats.filter(s => !usedSeatKeys.has(`${s.r}-${s.c}`)).sort((a, b) => a.c - b.c || a.r - b.r);
+  normalPool.forEach((st, i) => { if(remainingSeats[i]) seatMap[remainingSeats[i].r][remainingSeats[i].c] = st; });
 
   renderView(areaStudent, seatMap, false);
   renderView(areaTeacher, seatMap, true);
+  syncStudentWindow(); // 別窓を更新
 }
-
-// --- ユーティリティ ---
 
 function renderView(container, seatMap, isReverse) {
   container.innerHTML = "";
@@ -342,7 +329,7 @@ function renderView(container, seatMap, isReverse) {
     cIdx.forEach(c => {
       const seatEl = document.createElement("div"); seatEl.className = "seat";
       if(hiddenSeats.has(`${r}-${c}`)) { 
-        seatEl.classList.add("hidden-spacer"); seatEl.innerHTML = "<span style='color:#ccc; font-size:0.7em;'>空席</span>";
+        seatEl.className = "seat hidden-spacer"; seatEl.innerHTML = "<span style='color:#ccc; font-size:0.7em;'>空席</span>";
       } else {
         const s = seatMap[r][c];
         if(s) {
@@ -358,8 +345,8 @@ function renderView(container, seatMap, isReverse) {
 }
 
 function updateScaleUI(val) {
-  document.getElementById("scaleValue").textContent = Math.round(val * 100) + "%";
   document.documentElement.style.setProperty('--print-scale', val);
+  syncStudentWindow();
 }
 document.getElementById("scaleSlider").addEventListener("input", (e) => updateScaleUI(e.target.value));
 
@@ -386,7 +373,7 @@ function renderMiniSeats() {
 }
 
 // --- イベント ---
-
+document.getElementById("popoutBtn").addEventListener("click", openStudentWindow);
 document.getElementById("addNamesBtn").addEventListener("click", () => {
   const lines = document.getElementById("nameInput").value.split("\n").filter(l=>l.trim()!=="");
   tbody.innerHTML = "";
@@ -403,7 +390,7 @@ document.getElementById("shuffleBtn").addEventListener("click", () => {
   const timer = setInterval(() => {
     doShuffleProcess(); count++;
     statusText.textContent = `シャッフル中... (${count}/${times})`;
-    if(count >= times) { clearInterval(timer); showStatus("✨ 完了しました。", "#e64a19"); }
+    if(count >= times) { clearInterval(timer); showStatus("✨ 完了", "#e64a19"); }
   }, 80);
 });
 
@@ -413,7 +400,7 @@ document.getElementById("pdfBtn").addEventListener("click", () => {
 });
 
 document.getElementById("saveBtn").addEventListener("click", saveData);
-document.getElementById("resetBtn").addEventListener("click", deleteData);
+document.getElementById("resetBtn").addEventListener("click", () => { if(confirm("消去？")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } });
 document.getElementById("addRowBtn").addEventListener("click", () => createRow(tbody.rows.length+1, "", ""));
 
 window.addEventListener("DOMContentLoaded", () => {
