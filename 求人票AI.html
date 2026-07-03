@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple AI Chat</title>
+    <style>
+        /* CSS: デザインの設定 */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #e5ddd5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #chat-container {
+            width: 100%;
+            max-width: 450px;
+            height: 80vh;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        #chat-header {
+            background: #075e54;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        #chat-window {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background-color: #dcf8c6;
+            color: #333;
+            border-bottom-right-radius: 2px;
+        }
+
+        .ai-msg {
+            align-self: flex-start;
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ddd;
+            border-bottom-left-radius: 2px;
+        }
+
+        .typing {
+            font-style: italic;
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        #input-area {
+            display: flex;
+            padding: 15px;
+            background: #f0f0f0;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            outline: none;
+        }
+
+        button {
+            background: #075e54;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #128c7e;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-container">
+    <div id="chat-header">JS AI Assistant</div>
+    <div id="chat-window">
+        <div class="message ai-msg">こんにちは！私はJavaScriptで生まれたAIです。何かお話ししましょう！</div>
+    </div>
+    <div id="typing-indicator" class="typing" style="padding-left: 20px; display: none;">AIが入力中...</div>
+    <div id="input-area">
+        <input type="text" id="user-input" placeholder="メッセージを入力..." autocomplete="off">
+        <button id="send-btn">送信</button>
+    </div>
+</div>
+
+<script>
+    // JavaScript: AIのロジック
+    const chatWindow = document.getElementById('chat-window');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const typingIndicator = document.getElementById('typing-indicator');
+
+    // 記憶用データ
+    let userName = "";
+
+    // 応答パターン辞書
+    const responses = {
+        "こんにちは": "こんにちは！いい天気ですね。",
+        "名前は": "私はあなたのブラウザの中で動くAIです。名前はまだありません。",
+        "何ができる": "簡単な会話や、言葉を覚えることができますよ。",
+        "疲れた": "お疲れ様です。温かい飲み物でも飲んでゆっくりしてくださいね。",
+        "好き": "それは嬉しいです！私もあなたと話すのが好きです。",
+        "さようなら": "また会いましょう！いつでも話しかけてくださいね。"
+    };
+
+    // メッセージ送信関数
+    function sendMessage() {
+        const text = userInput.value.trim();
+        if (text === "") return;
+
+        // 1. ユーザーのメッセージを表示
+        addMessage(text, 'user-msg');
+        userInput.value = "";
+
+        // 2. AIの思考中表示
+        showTyping(true);
+
+        // 3. AIの応答生成 (1秒後に返信)
+        setTimeout(() => {
+            const aiReply = generateAIResponse(text);
+            showTyping(false);
+            addMessage(aiReply, 'ai-msg');
+        }, 1000);
+    }
+
+    // AIの応答ロジック
+    function generateAIResponse(input) {
+        // 名前を教えられた場合
+        if (input.includes("私の名前は")) {
+            userName = input.replace("私の名前は", "").replace("です", "").trim();
+            return `${userName}さんですね！覚えました。`;
+        }
+
+        if (input.includes("名前を呼んで")) {
+            return userName ? `あなたの名前は${userName}さんですよね？` : "まだお名前を聞いていません。";
+        }
+
+        // 辞書から検索
+        for (let key in responses) {
+            if (input.includes(key)) {
+                return responses[key];
+            }
+        }
+
+        // 計算機能 (例: 1+1)
+        if (input.match(/[0-9][\+\-\*\/][0-9]/)) {
+            try {
+                const result = eval(input.match(/[0-9\+\-\*\/\(\)\.]+/g).join(""));
+                return `計算ですね。答えは ${result} です。`;
+            } catch (e) {
+                return "計算しようとしましたが、難しくて分かりませんでした。";
+            }
+        }
+
+        // 該当なしの場合
+        const defaults = [
+            "なるほど、詳しく教えてください。",
+            "面白いですね！",
+            "それからどうなりましたか？",
+            "すみません、勉強不足で分かりません。",
+            "もっとお話ししたいです。"
+        ];
+        return defaults[Math.floor(Math.random() * defaults.length)];
+    }
+
+    // 画面にメッセージを追加する関数
+    function addMessage(text, className) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', className);
+        msgDiv.textContent = text;
+        chatWindow.appendChild(msgDiv);
+
+        // 自動スクロール
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    // タイピング中表示の切り替え
+    function showTyping(isTyping) {
+        typingIndicator.style.display = isTyping ? 'block' : 'none';
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    // イベントリスナー
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+</script>
+
+</body>
+</html>
