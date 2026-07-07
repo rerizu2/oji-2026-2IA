@@ -79,6 +79,11 @@
     .news-date { font-family: 'Roboto Mono', monospace; font-weight: bold; color: var(--primary-dark); min-width: 90px; }
     .news-link { color: var(--primary-dark); font-weight: bold; text-decoration: underline; margin-left: auto; }
 
+    /* 集計表示エリア */
+    .stats-container { display: flex; flex-wrap: wrap; gap: 20px; padding: 15px; background: #f8fcff; border-radius: 15px; border: 2px solid var(--primary); margin-bottom: 20px; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .stats-item { flex: 1; min-width: 150px; }
+    .stats-item strong { color: var(--primary-dark); display: block; margin-bottom: 5px; border-bottom: 1px solid #ddd; }
+
     /* 求人検索パネル */
     .search-panel { background: #fdfdfd; border: 1px solid #ddd; border-radius: var(--card-radius); padding: 20px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; transition: 0.3s; }
     .search-group { display: flex; flex-direction: column; }
@@ -175,8 +180,8 @@
     const targetHash = "102ab13815f135"; // V9hug
     let currentLang = 'ja', currentPage = 'home', videoStream = null, isScanning = false;
 
-    // --- 求人データ (短縮版: 実際には多くのデータをここに追加) ---
-    const jobList = [
+    // --- 求人データ ---
+     const jobList = [
   // --- 2026/07/01 受付分 ---
   [1, "[ハウス食品(株) 奈良工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=0)", "技術職（電気通信設備）", "2026/07/01", "奈良県内"],
   [2, "[オカハシ(株)](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=1)", "機械オペレーター・検査スタッフ", "2026/07/01", "奈良県内"],
@@ -781,6 +786,7 @@
         headerLogo: "✨ 2IA OJI-TECH", headerLogo1IA: "2年 I科 A組", heroTitle: "✨ 2IA's Blue World ✨", heroTitle1IA: "ようこそ 2IA ページへ", heroSub: "王寺工業高校 情報電子工学科 2年A組", heroSub1IA: "情報電子工学科 クラシックモード",
         newsTitle: "📢 おしらせ！", detailsText: "詳細はこちら", aboutTitle: "2IA メンバーズページについて", aboutP: "このページは2IAの皆様・保護者専用です。", qrTitle: "2IAページ QRコード", alertPass: "パスワードが違います", emptyEvent: "今はイベント準備中かな？",
         search: ["受付NO.", "事業所名", "職種名", "区分", "届いた日", "条件リセット"], allLoc: "すべて", th: ["NO", "事業所名", "職種名", "届いた日", "詳細", "区分"], badgeIn: "奈良県内", badgeOut: "奈良県外", btnKyujin: "求人票を見る",
+        statsTitle: "📊 集計結果", dateGroup: "届いた日別", countTotal: "合計",
         newsList: [
           { date: "2026/07/05", text: "メンテナス内容", url: "https://rerizu2.github.io/oji-2026-2IA/アップデート内容1.html"},
           { date: "2026/07/05", text: "メンテナンス終了"},
@@ -798,6 +804,7 @@
         headerLogo: "✨ 2IA OJI-TECH", headerLogo1IA: "Class 2IA", heroTitle: "✨ 2IA's Blue World ✨", heroTitle1IA: "Welcome to 2IA Page", heroSub: "Oji Tech HS", heroSub1IA: "Classic Mode",
         newsTitle: "📢 News", detailsText: "Details here", aboutTitle: "About This Page", aboutP: "For 2IA students and parents only.", qrTitle: "QR Code", alertPass: "Incorrect Password", emptyEvent: "No events scheduled.",
         search: ["ID No.", "Company", "Job", "Region", "Date", "Reset"], allLoc: "All", th: ["ID", "Company", "Job", "Date", "Detail", "Region"], badgeIn: "In Nara", badgeOut: "Outside", btnKyujin: "View Job",
+        statsTitle: "📊 Statistics", dateGroup: "By Date", countTotal: "Total",
         newsList: [
           { date: "2026/07/05", text: "Maintenance details", url: "https://rerizu2.github.io/oji-2026-2IA/アップデート内容1.html"},
           { date: "2026/07/05", text: "Maintenance finished"},
@@ -815,6 +822,7 @@
         headerLogo: "✨ 2IA OJI-TECH", headerLogo1IA: "2학년 I과 A반", heroTitle: "✨ 2IA's Blue World ✨", heroTitle1IA: "2IA 페이지에 오신 것을 환영합니다", heroSub: "왕지공업고등학교", heroSub1IA: "클래식 모드",
         newsTitle: "📢 공지사항", detailsText: "자세히", aboutTitle: "이 페이지에 대하여", aboutP: "2IA 학생 및 학부모 전용입니다.", qrTitle: "QR 코드", alertPass: "비밀번호가 틀렸습니다", emptyEvent: "준비 중입니다.",
         search: ["접수 NO.", "사업소명", "직종명", "구분", "접수일", "리셋"], allLoc: "전체", th: ["번호", "사업소명", "직종명", "날짜", "상세", "구분"], badgeIn: "현내", badgeOut: "현외", btnKyujin: "구인표 보기",
+        statsTitle: "📊 집계 결과", dateGroup: "날짜별", countTotal: "합계",
         newsList: [
           { date: "2026/07/05", text: "점검 내용 안내", url: "https://rerizu2.github.io/oji-2026-2IA/アップデート内容1.html"},
           { date: "2026/07/05", text: "점검 종료"},
@@ -892,6 +900,9 @@
                   <div class="search-group"><label>${t.search[4]}</label><input type="date" id="s-date" onchange="applyFilters()"></div>
                   <button class="btn-reset" onclick="resetFilters()">${t.search[5]}</button>
                 </div>
+                
+                <div id="stats-area" class="stats-container"></div>
+
                 <div class="table-container">
                   <table class="job-table">
                     <thead><tr><th>${t.th[0]}</th><th>${t.th[1]}</th><th>${t.th[2]}</th><th>${t.th[3]}</th><th>${t.th[4]}</th><th>${t.th[5]}</th></tr></thead>
@@ -918,9 +929,15 @@
       const vDateRaw = document.getElementById('s-date')?.value || "";
       const vDate = vDateRaw.replace(/-/g, '/');
       const tbody = document.getElementById('job-body');
+      const statsArea = document.getElementById('stats-area');
       const t = translations[currentLang];
+      
       if (!tbody) return; 
       tbody.innerHTML = "";
+
+      let countKenai = 0, countKengai = 0;
+      let dateStats = {};
+
       jobList.forEach(row => { 
         const info = parseMarkdown(row[1]); 
         if ((vNo === "" || row[0].toString() === vNo) && 
@@ -928,11 +945,36 @@
             row[2].toLowerCase().includes(vJob) && 
             (vLoc === "" || row[4].includes(vLoc)) && 
             (vDate === "" || row[3].includes(vDate))) { 
+          
+          // カウント処理
+          if (row[4].includes("県内")) countKenai++;
+          else if (row[4].includes("県外")) countKengai++;
+          
+          const d = row[3];
+          dateStats[d] = (dateStats[d] || 0) + 1;
+
           const badge = row[4].includes("県内") ? "badge-kenai" : "badge-kengai"; 
           const btn = info.url ? `<a href="${info.url}" target="_blank" class="btn-job-detail">${t.btnKyujin}</a>` : ""; 
           tbody.innerHTML += `<tr><td>${row[0]}</td><td style="font-weight:bold;">${info.name}</td><td>${row[2]}</td><td>${row[3]}</td><td>${btn}</td><td><span class="${badge}">${row[4].includes("県内") ? t.badgeIn : t.badgeOut}</span></td></tr>`; 
         } 
       });
+
+      // 集計表示の更新
+      if (statsArea) {
+        let dateHtml = Object.keys(dateStats).sort().reverse().map(d => `${d}: <b>${dateStats[d]}</b>`).join(" / ");
+        statsArea.innerHTML = `
+          <div class="stats-item">
+            <strong>${t.statsTitle}</strong>
+            ${t.badgeIn}: <span class="badge-kenai">${countKenai}</span> / 
+            ${t.badgeOut}: <span class="badge-kengai">${countKengai}</span> / 
+            ${t.countTotal}: <b>${countKenai + countKengai}</b>
+          </div>
+          <div class="stats-item" style="flex:2;">
+            <strong>${t.dateGroup}</strong>
+            ${dateHtml || "---"}
+          </div>
+        `;
+      }
     }
 
     function resetFilters() { 
