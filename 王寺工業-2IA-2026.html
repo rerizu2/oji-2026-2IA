@@ -69,7 +69,7 @@
 
     /* コンテンツ */
     .page-content { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
-    .card { background: white; border-radius: var(--card-radius); padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-bottom: var(--card-border); transition: 0.3s; }
+    .card { background: white; border-radius: var(--card-radius); padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-bottom: var(--card-border); transition: 0.3s; overflow: hidden; }
     .card h2 { color: var(--primary-dark); font-size: 20px; border-left: 5px solid var(--primary); padding-left: 10px; margin-bottom: 15px; }
 
     /* お知らせリスト */
@@ -94,10 +94,12 @@
     .table-container { width: 100%; overflow-x: auto; border-radius: 15px; }
     .job-table { width: 100%; border-collapse: collapse; min-width: 800px; }
     .job-table th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 14px; }
-    .job-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
-    .btn-job-detail { background: var(--btn-blue); color: white !important; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 11px; }
-    .badge-kenai { background: #4cc9f0; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
-    .badge-kengai { background: #ff4d6d; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+    .job-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; vertical-align: middle; }
+
+    /* --- 改行防止設定 --- */
+    .btn-job-detail { background: var(--btn-blue); color: white !important; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 11px; white-space: nowrap; display: inline-block; }
+    .badge-kenai { background: #4cc9f0; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; white-space: nowrap; display: inline-block; }
+    .badge-kengai { background: #ff4d6d; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; white-space: nowrap; display: inline-block; }
 
     footer { background: var(--primary); color: white; text-align: center; padding: 30px 0; margin-top: 50px; border-top-left-radius: 30px; border-top-right-radius: 30px; transition: 0.3s; }
     body.theme-1ia footer { border-radius: 0; background: #222; }
@@ -860,7 +862,71 @@
 [10476, "[㈱エムジー 商品センター](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=672)", "生産関連業務", "2026/07/08", "奈良県外"],
 [10477, "[アートセッティングデリバリー㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=673)", "テクニカルドライバー", "2026/07/08", "奈良県外"],
 [10478, "[㈱アペックス西日本](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=674)", "ルートセールス奈良", "2026/07/08", "奈良県外"],
-[10479, "[㈱ネット](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=675)", "施工管理・電工職", "2026/07/08", "奈良県外"]
+[10479, "[㈱ネット](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=675)", "施工管理・電工職", "2026/07/08", "奈良県外"],
+[205, "[近畿ニチレキ工事㈱奈良営業所](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=204)", "現場監督（施工管理）", "2026/07/09", "奈良県内"],
+[206, "[トナミ運輸㈱奈良第2流通センター](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=205)", "倉庫オペレーター職/年間休日120日", "2026/07/09", "奈良県内"],
+[207, "[トナミ運輸㈱奈良支店](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=206)", "集配ドライバー職", "2026/07/09", "奈良県内"],
+[208, "[㈱アイワモータース](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=207)", "整備士補助", "2026/07/09", "奈良県内"],
+[209, "[㈱理研計器 奈良製作所](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=208)", "技術", "2026/07/09", "奈良県内"],
+[210, "[㈱理研計器 奈良製作所](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=209)", "製造", "2026/07/09", "奈良県内"],
+[211, "[東邦工機㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=210)", "製品及び部品検査", "2026/07/09", "奈良県内"],
+[212, "[東邦工機㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=211)", "作業工具の加工・組立", "2026/07/09", "奈良県内"],
+[213, "[東邦工機㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=212)", "鍛造工", "2026/07/09", "奈良県内"],
+[214, "[㈱藤田油機](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=213)", "製造職※組立工", "2026/07/09", "奈良県内"],
+[215, "[㈱藤田油機](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=214)", "製造職※金属加工", "2026/07/09", "奈良県内"],
+[216, "[㈱藤田油機](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=215)", "資材【購買】", "2026/07/09", "奈良県内"],
+[217, "[㈱松竹工業](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=216)", "土木施工管理", "2026/07/09", "奈良県内"],
+[218, "[能瀬精工㈱ 奈良第二工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=217)", "製造・組立スタッフ", "2026/07/09", "奈良県内"],
+[219, "[㈱ベネフル](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=218)", "営業見習い", "2026/07/09", "奈良県内"],
+[220, "[㈱ベネフル](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=219)", "自動車整備士", "2026/07/09", "奈良県内"],
+[221, "[ダイキンファインテック㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=220)", "製造", "2026/07/09", "奈良県内"],
+[222, "[社会福祉法人 三寿福祉会](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=221)", "介護職（友喜苑・友幸苑）", "2026/07/09", "奈良県内"],
+[223, "[社会福祉法人 三寿福祉会](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=222)", "生活支援員（障害者支援施設 つわぶき...）", "2026/07/09", "奈良県内"],
+[224, "[吉田製材 ㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=223)", "木材加工", "2026/07/09", "奈良県内"],
+[225, "[三建工業㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=224)", "土木技術者", "2026/07/09", "奈良県内"],
+[226, "[㈱カシワラ](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=225)", "自動車改造作業", "2026/07/09", "奈良県内"],
+[10480, "[㈱田中機設](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=698)", "機械器具設置作業員", "2026/07/09", "奈良県外"],
+[10481, "[㈱キタコ](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=699)", "自社商品の管理業務", "2026/07/09", "奈良県外"],
+[10482, "[タチバナテクノス㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=700)", "現業職(製造）", "2026/07/09", "奈良県外"],
+[10483, "[タチバナテクノス㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=701)", "現業職(プレス加工・組立・検査・梱包...", "2026/07/09", "奈良県外"],
+[10484, "[タチバナテクノス㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=702)", "現業職（冷蔵庫・エアコンプレス加工・...", "2026/07/09", "奈良県外"],
+[10485, "[タチバナテクノス㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=703)", "技術職", "2026/07/09", "奈良県外"],
+[10486, "[㈱なんつね](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=704)", "組立業務", "2026/07/09", "奈良県外"],
+[10487, "[㈱イムラ奈良新庄工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=705)", "製袋オペレーター", "2026/07/09", "奈良県外"],
+[10488, "[㈱イムラ奈良新庄工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=706)", "製袋検査員（チェッカー）", "2026/07/09", "奈良県外"],
+[10489, "[㈱イムラ奈良新庄工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=707)", "封入機オペレーター", "2026/07/09", "奈良県外"],
+[10490, "[能瀬精工㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=708)", "製造・組立スタッフ", "2026/07/09", "奈良県外"],
+[10491, "[国分工業㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=709)", "製造工", "2026/07/09", "奈良県外"],
+[10492, "[㈱日立ビルシステムエンジニアリング](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=710)", "エレベーター・エスカレーターの建設工...", "2026/07/09", "奈良県外"],
+[10493, "[㈱日立ビルシステムエンジニアリング](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=711)", "ビル設備施工・メンテナンスエンジニア...", "2026/07/09", "奈良県外"],
+[10494, "[㈱ミリオナ化粧品](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=712)", "化粧品の研究開発【中央研究所】...", "2026/07/09", "奈良県外"],
+[10495, "[㈱ミリオナ化粧品](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=713)", "化粧品の品質管理【資材受入検査】【東...", "2026/07/09", "奈良県外"],
+[10496, "[㈱ミリオナ化粧品](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=714)", "化粧品の物流【東大阪ロジティクス】...", "2026/07/09", "奈良県外"],
+[10497, "[㈱ミリオナ化粧品](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=715)", "化粧品の生産【加納工場】", "2026/07/09", "奈良県外"],
+[10498, "[㈱ミリオナ化粧品](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=716)", "化粧品の製造【大阪工場】", "2026/07/09", "奈良県外"],
+[10499, "[アイコム㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=717)", "組立ソフト設計職", "2026/07/09", "奈良県外"],
+[10500, "[アイコム㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=718)", "回路設計職", "2026/07/09", "奈良県外"],
+[227, "[上六印刷㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=226)", "機械オペレーター・検査スタッフ...", "2026/07/10", "奈良県内"],
+[228, "[㈱松徳　奈良工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=227)", "金属熱処理加工員", "2026/07/10", "奈良県内"],
+[229, "[㈱伸和鉄工所](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=228)", "マシンオペレーター", "2026/07/10", "奈良県内"],
+[230, "[小寺電業㈱　奈良支店](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=229)", "電気技能職（電工）", "2026/07/10", "奈良県内"],
+[231, "[㈱イムラ　奈良新庄工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=230)", "製袋オペレーター", "2026/07/10", "奈良県内"],
+[232, "[㈱イムラ　奈良新庄工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=231)", "製袋検査員", "2026/07/10", "奈良県内"],
+[233, "[㈱イムラ　奈良新庄工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=232)", "封入機オペレーター", "2026/07/10", "奈良県内"],
+[234, "[住江テクノ㈱　奈良工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=233)", "製造", "2026/07/10", "奈良県内"],
+[235, "[大文設備工業㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=234)", "現場施工管理", "2026/07/10", "奈良県内"],
+[236, "[葛城工業㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=235)", "製造職", "2026/07/10", "奈良県内"],
+[237, "[㈱サンコー](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=236)", "段ボール製品等製造【年間休日125日...", "2026/07/10", "奈良県内"],
+[238, "[㈱高木包装](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=237)", "生産本部　機械オペレーター", "2026/07/10", "奈良県内"],
+[239, "[シャープ㈱　スマートビジネスソリュー...](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=238)", "工場設備管理技能職", "2026/07/10", "奈良県内"],
+[240, "[シャープ㈱　スマートビジネスソリュー...](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=239)", "生産管理職", "2026/07/10", "奈良県内"],
+[241, "[トヨタユナイテッド奈良㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=240)", "自動車整備士", "2026/07/10", "奈良県内"],
+[242, "[トヨタユナイテッド奈良㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=241)", "板金エンジニア", "2026/07/10", "奈良県内"],
+[10510, "[㈱エクシオテック](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=731)", "電気通信工事士", "2026/07/10", "奈良県外"],
+[10511, "[㈱ウォーターエージェンシー](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=732)", "施工管理", "2026/07/10", "奈良県外"],
+[10512, "[㈱豊国昭和重機製作所](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=733)", "技能職（京都）", "2026/07/10", "奈良県外"],
+[10513, "[カナデビア㈱　築港工場](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=734)", "技能職", "2026/07/10", "奈良県外"],
+[10514, "[日本ファシリオ㈱](https://script.google.com/a/macros/e-net.nara.jp/s/AKfycbxRI0ACcwrfAvvwR-nKz7Y0MqC77ou9AgGFNHuCHv3s0fvgoSO6jU2aALyhvmMgfuudag/exec?code=735)", "施工管理", "2026/07/10", "奈良県外"]
 ];
 
     const translations = {
@@ -872,6 +938,7 @@
         search: ["受付NO.", "事業所名", "職種名", "区分", "届いた日", "条件リセット"], allLoc: "すべて", th: ["NO", "事業所名", "職種名", "届いた日", "詳細", "区分"], badgeIn: "奈良県内", badgeOut: "奈良県外", btnKyujin: "求人票を見る",
         statsTitle: "📊 集計結果", dateGroup: "届いた日別", countTotal: "合計",
         newsList: [
+          { date: "2026/07/09", text: "求人票カウント、求人票サポートAIを追加"},
           { date: "2026/07/05", text: "メンテナス内容", url: "https://rerizu2.github.io/oji-2026-2IA/アップデート内容1.html"},
           { date: "2026/07/05", text: "メンテナンス終了"},
           { date: "2026/07/04", text: "メンテナンス開始"},
@@ -890,6 +957,7 @@
         search: ["ID No.", "Company", "Job", "Region", "Date", "Reset"], allLoc: "All", th: ["ID", "Company", "Job", "Date", "Detail", "Region"], badgeIn: "In Nara", badgeOut: "Outside", btnKyujin: "View Job",
         statsTitle: "📊 Statistics", dateGroup: "By Date", countTotal: "Total",
         newsList: [
+          { date: "2026/07/09", text: "Added job posting count and job posting support AI."},
           { date: "2026/07/05", text: "Maintenance details", url: "https://rerizu2.github.io/oji-2026-2IA/アップデート内容1.html"},
           { date: "2026/07/05", text: "Maintenance finished"},
           { date: "2026/07/04", text: "Maintenance started"},
@@ -908,6 +976,7 @@
         search: ["접수 NO.", "사업소명", "직종명", "구분", "접수일", "리셋"], allLoc: "전체", th: ["번호", "사업소명", "직종명", "날짜", "상세", "구분"], badgeIn: "현내", badgeOut: "현외", btnKyujin: "구인표 보기",
         statsTitle: "📊 집계 결과", dateGroup: "날짜별", countTotal: "합계",
         newsList: [
+          { date: "2026/07/09", text: "구인표 카운트,구인표 지원 AI 추가"},
           { date: "2026/07/05", text: "점검 내용 안내", url: "https://rerizu2.github.io/oji-2026-2IA/アップデート内容1.html"},
           { date: "2026/07/05", text: "점검 종료"},
           { date: "2026/07/04", text: "점검 시작"},
@@ -976,6 +1045,17 @@
       } 
       else if (page === 'kyujin') {
         html = `<h1>${t.nav[1]}</h1>
+                <!-- 追加されたAIチャットボット -->
+                <div class="card" style="padding: 0;">
+                  <iframe
+ src="https://udify.app/chatbot/cr0668AGkjYs66Ti"
+ style="width: 100%; height: 100%; min-height: 700px"
+ frameborder="0"
+ allow="microphone">
+</iframe>
+<p>※はじめは「<b><u>こんにちは</u></b>」と言ってからはじめること。もし、エラーが発生した場合は一政にお伝えください。</p>
+                </div>
+
                 <div class="search-panel">
                   <div class="search-group"><label>${t.search[0]}</label><input type="text" id="s-no" oninput="applyFilters()"></div>
                   <div class="search-group"><label>${t.search[1]}</label><input type="text" id="s-comp" oninput="applyFilters()"></div>
@@ -1030,7 +1110,6 @@
             (vLoc === "" || row[4].includes(vLoc)) && 
             (vDate === "" || row[3].includes(vDate))) { 
           
-          // カウント処理
           if (row[4].includes("県内")) countKenai++;
           else if (row[4].includes("県外")) countKengai++;
           
@@ -1043,7 +1122,6 @@
         } 
       });
 
-      // 集計表示の更新
       if (statsArea) {
         let dateHtml = Object.keys(dateStats).sort().reverse().map(d => `${d}: <b>${dateStats[d]}</b>`).join(" / ");
         statsArea.innerHTML = `
