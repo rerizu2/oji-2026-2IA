@@ -1085,7 +1085,7 @@
         loginTitle: "2IA Blue Members", loginTitle1IA: "パスワードを入力してください", loginMsg: "パスワードを入れてね！", loginBtn: "ログイン", qrBtn: "QRスキャン", orientH2: "画面を横向きにしてね！", orientP: "横向き閲覧推奨です。", themeLabel2IA: "1IA風", themeLabel1IA: "2IA風",
         nav: ["🏠ホーム", "💼求人票", "📅時間割", "🗓️カレンダー", "🎉イベント", "🖊️委員・係", "📖学習/AI", "📝テスト", "📁プリント"],
         headerLogo: "✨ 2IA OJI-TECH", headerLogo1IA: "2年 I科 A組", heroTitle: "✨ 2IA's Blue World ✨", heroTitle1IA: "ようこそ 2IA ページへ", heroSub: "王寺工業高校 情報電子工学科 2年A組", heroSub1IA: "情報電子工学科 クラシックモード",
-        newsTitle: "📢 おしらせ！", detailsText: "詳細はこちら", aboutTitle: "2IA メンバーズページについて", aboutP: "このページは2IAの皆様・保護者専用です。", qrTitle: "2IAページ QRコード", alertPass: "パスワードが違います", emptyEvent: "今はイベント準備中かな？",
+        newsTitle: "📢 おしらせ！", detailsText: "詳細はこちら", aboutTitle: "2IA メンバーズページについて", aboutP: "このページは2IAの皆様・保護者専用です。", qrTitle: "2IAページ QRコード", alertPass: "パスワードが違います", emptyEvent: "現在のイベント行事！",
         search: ["受付NO.", "事業所名", "職種名", "区分", "届いた日", "条件リセット"], allLoc: "すべて", th: ["NO", "事業所名", "職種名", "届いた日", "詳細", "区分"], badgeIn: "奈良県内", badgeOut: "奈良県外", btnKyujin: "求人票を見る",
         statsTitle: "📊 集計結果", dateGroup: "届いた日別", countTotal: "合計",
         newsList: [
@@ -1228,7 +1228,12 @@
       } 
       else if (page === 'schedule') { html = `<h1>${t.nav[2]}</h1><div class="card"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQv5WpolITwLMOUMj4pWlA5J9coAKDJLkcr_DCmpTvOqsYyNOTnFRbOKnXM73czN4MpaDaUT7xVIelM/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false" height="400"></iframe></div>`; }
       else if (page === 'calendar') { html = `<h1>${t.nav[3]}</h1><div class="card"><iframe src="https://calendar.google.com/calendar/embed?src=oji.information.1ia%40gmail.com&ctz=Asia%2FTokyo" height="500"></iframe><br><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQv5WpolITwLMOUMj4pWlA5J9coAKDJLkcr_DCmpTvOqsYyNOTnFRbOKnXM73czN4MpaDaUT7xVIelM/pubhtml?gid=1502073658&amp;single=true&amp;widget=true&amp;headers=false" height="800"></iframe></div>`; }
-      else if (page === 'ibento') { html = `<h1>${t.nav[4]}</h1><div class="card"><p style="text-align:center;">${t.emptyEvent}</p></div>`; }
+      else if (page === 'ibento') { html = `<h1>${t.nav[4]}</h1><div class="card"><iframe
+ src="https://rerizu2.github.io/oji-2026-2IA/2026_9_30_%E4%BF%AE%E5%AD%A6%E6%97%85%E8%A1%8C%E3%81%97%E3%81%8A%E3%82%8A.pdf"
+ style="width: 100%; height: 100%; min-height: 700px"
+ frameborder="0"
+ allow="microphone">
+</iframe><p style="text-align:center;">${t.emptyEvent}</p></div>`; }
       else if (page === 'kakari') { html = `<h1>${t.nav[5]}</h1><div class="card"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vR_C8R7ezRBsUXx1Z6JdiXx08e5xA27VRYHB3w-G6lpUsmL1ymS8GtG7PKfB705dqZitdbCiRZVQlZz/pubhtml?widget=true&amp;headers=false" height="800"></iframe></div>`; }
       else if (page === 'gakusyuu') { html = `<h1>${t.nav[6]}</h1><div class="card"><h2>Seat Shuffle</h2><iframe src="https://rerizu2.github.io/oji-2026-2IA/%E5%B8%AD%E6%9B%BF%E3%81%88.html" style="height: 600px"></iframe></div><div class="card"><h2>AI Chat</h2><iframe src="https://udify.app/chatbot/92D920kUwjWcHbHb" style="height: 600px"></iframe></div>`; }
       else if (page === 'test') { html = `<h1>${t.nav[7]}</h1><div class="card"><iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRE3WB1xgKs3cxvjvuwiTDk5uPFO2bMzNCiQQbMaOfI5m9hWmkxZVn8qmideHJYVr8-_iGbB2KxgAzv/pubhtml?gid=2109316949&amp;single=true&amp;widget=true&amp;headers=false" height="600"></iframe></div>`; }
